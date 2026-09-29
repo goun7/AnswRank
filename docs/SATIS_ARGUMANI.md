@@ -75,7 +75,7 @@ Rakip analizinde **"Best Dental Clinic in Dubai" tarzı listeler** ilk 10'un
 "ranked best-of listicle" formatına gider.
 
 - Klinik bu listelerde yok; rakipleri `rakip-klinik-b.example`, `rakip-klinik-a.example`
-  `drpaulsdentalclinic.com` listicle başlıklarıyla #1-#3'te.
+  `Klinik.com` listicle başlıklarıyla #1-#3'te.
 - **Fırsat sinyali zaten tespit edildi** (`listicle_firsati_var: true`) —
   listelere girmek, organik sıralamayı yükseltmekten **daha hızlı** sonuç
   verir.
