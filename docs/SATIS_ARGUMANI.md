@@ -7,7 +7,7 @@
 
 ## 1. Kanıtlanmış karşılaştırma: Teknik 100/100, AI görünürlüğü 39/100
 
-İlk ölçüm klinikimiz **biolitedubai.com** üzerinde yapıldı. Sonuç:
+İlk ölçüm klinikimiz **klinik-1.example** üzerinde yapıldı. Sonuç:
 
 | Ölçüm | Puan | Anlamı |
 |---|---|---|
@@ -21,7 +21,7 @@ engellenmemiş, llms.txt konmuş. Teknik ekiplerin baktığı her şey 100/100.
 Ama AI görünürlüğü **39/100**. Yani teknik olarak "her şey doğru" iken
 ChatGPT/Perplexity/Gemini o klinikleri cevaplarında **göstermiyor**.
 
-> **Dürüst not:** 39/100 puanı tek bir domainin (biolitedubai.com) 5 Google
+> **Dürüst not:** 39/100 puanı tek bir domainin (klinik-1.example) 5 Google
 > sorgusu üzerinden alınmış **ilk ölçümüdür**. Bu bir ortalama değildir; her
 > klinik için ayrı ölçülür.
 
@@ -131,7 +131,7 @@ skor anlamsızdır."* Bu dürüstlük, `docs/DENETIM_RAPORU.md`'de işaret edile
 |---|---|
 | 1218 test, 0 failed | ✅ `timeout 250 .venv/bin/pytest tests/ -q` RC=0 |
 | Gizlilik (orphan rewrite) | ✅ SERPER_API_KEY log'a yazılmaz (test ile sabit) |
-| 39/100 ölçümü | ✅ `olcumler/biolitedubai.com.json` kayıtlı |
+| 39/100 ölçümü | ✅ `olcumler/klinik-1.example.json` kayıtlı |
 | 100/100 teknik skor | ✅ aynı dosyada `erisim.puan = 20/20` |
 | Skor formülü | ✅ ağırlık testi: 45/25/20/10 = 100 |
 
