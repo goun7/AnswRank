@@ -35,7 +35,7 @@ Skoru üreten 4 alt-puanın her biri ölçüldü. Hangisinin zayıf olduğu nett
 "dentist Dubai", "dental clinic Dubai", "best dentist Dubai",
 "teeth whitening Dubai", "dental implants Dubai".
 
-- Aynı sorgularda rakip `drjoydentalclinic.com` **5/5 sorguda #1**.
+- Aynı sorgularda rakip `rakip-klinik-a.example` **5/5 sorguda #1**.
 - Akademik kanıt: AI alıntılarının %85,1'i rank-1'den, %42,8'i rank-5'ten
   (CiteChoice). İlk 10'da olmayan bir site, AI tarafından neredeyse hiç
   alıntılanmıyor.
@@ -74,7 +74,7 @@ Rakip analizinde **"Best Dental Clinic in Dubai" tarzı listeler** ilk 10'un
 7 sonucunu kaplamış. Kumar/Ranqo 2026: AI atıflarının **~%21'i** bu
 "ranked best-of listicle" formatına gider.
 
-- Klinik bu listelerde yok; rakipleri `drmichaels.com`, `drjoydentalclinic.com`
+- Klinik bu listelerde yok; rakipleri `rakip-klinik-b.example`, `rakip-klinik-a.example`
   `drpaulsdentalclinic.com` listicle başlıklarıyla #1-#3'te.
 - **Fırsat sinyali zaten tespit edildi** (`listicle_firsati_var: true`) —
   listelere girmek, organik sıralamayı yükseltmekten **daha hızlı** sonuç
