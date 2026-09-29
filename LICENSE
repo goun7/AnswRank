@@ -1,0 +1,30 @@
+AnswRank Proprietary License — Source-Available (No Distribution)
+
+Copyright (c) 2026 AnswRank. Tüm hakları saklıdır.
+
+Bu yazılımın KAYNAK KODU görünür ("source-available") ancak bu,
+açık kaynak olduğu anlamına GELMEZ.
+
+1. TANIMLAR
+   "Yazılım": AnswRank AI Görünürlük Denetim ürünü ve tüm bileşenleri
+   (ai_gorunurluk.py, uret_rapor.py, llms_txt_kontrol.py, answrank/ paketi).
+
+2. İZİN VERİLENLER
+   - Bu yazılımı İNCELEME amacıyla okumak.
+   - Bu yazılımı kişisel, ticari olmayan test ve değerlendirmede kullanmak.
+
+3. YASAK OLANLAR
+   - Bu yazılımın HERHANGİ BİR BİÇİMDE DAĞITILMASI (kopya, satış, kiralama,
+     SaaS olarak sunma, başka bir ürüne gömme) YASAKTIR.
+   - Bu yazılımın türevlerinin oluşturulması ve dağıtılması YASAKTIR.
+   - Ticari amaçla herhangi bir bileşenin kullanılması YASAKTIR
+     (LicenseRef-AnswRank-Proprietary kapsamı dışında yazılı izin alınmadan).
+
+4. TİCARİ KULLANIM
+   Ticari kullanım için yazılı lisans gereklidir.
+
+5. GARANTİ YOK
+   Bu yazılım "OLDUĞU GİBİ" sunulur. Hiçbir garanti verilmez.
+
+Bu lisans LicenseRef-AnswRank-Proprietary olarak bilinir ve
+SPDK ifade olarak kullanılır.

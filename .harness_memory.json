@@ -1,0 +1,16 @@
+[
+  {
+    "id": "lesson_1789394060217_2gyz",
+    "timestamp": "2026-09-14T13:54:20.218Z",
+    "problem": "Probe issue",
+    "solution": "Probe solution",
+    "affectedFiles": [
+      "test.ts"
+    ],
+    "tags": [],
+    "recurrenceCount": 1,
+    "score": 1,
+    "status": "active",
+    "outcomes": []
+  }
+]

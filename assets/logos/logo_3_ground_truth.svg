@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111215"/>
+      <stop offset="100%" stop-color="#18191f"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9a7b2c"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="url(#bg3)" rx="32"/>
+
+  <!-- Icon: Precision Optical Sextant & Vertex -->
+  <g transform="translate(400, 330)">
+    <!-- Fine geometric circles -->
+    <circle cx="0" cy="0" r="140" stroke="#27272a" stroke-width="1.5" fill="none"/>
+    <circle cx="0" cy="0" r="110" stroke="url(#goldGrad)" stroke-width="2" fill="none" opacity="0.7"/>
+    
+    <!-- Quadrant ticks -->
+    <line x1="0" y1="-140" x2="0" y2="-125" stroke="#d4af37" stroke-width="3"/>
+    <line x1="0" y1="140" x2="0" y2="125" stroke="#d4af37" stroke-width="3"/>
+    <line x1="-140" y1="0" x2="-125" y2="0" stroke="#d4af37" stroke-width="3"/>
+    <line x1="140" y1="0" x2="125" y2="0" stroke="#d4af37" stroke-width="3"/>
+
+    <!-- Central Precision Diamond Glyph (Isometric Answer Prism) -->
+    <path d="M 0,-85 L 75,-40 L 75,45 L 0,90 L -75,45 L -75,-40 Z" 
+          stroke="#f4f4f5" stroke-width="4" fill="none"/>
+    
+    <!-- Facet Inner Lines -->
+    <line x1="0" y1="0" x2="0" y2="90" stroke="url(#goldGrad)" stroke-width="3"/>
+    <line x1="0" y1="0" x2="75" y2="-40" stroke="url(#goldGrad)" stroke-width="3"/>
+    <line x1="0" y1="0" x2="-75" y2="-40" stroke="url(#goldGrad)" stroke-width="3"/>
+
+    <!-- Core Citation Node -->
+    <circle cx="0" cy="0" r="8" fill="#fef08a"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="400" y="595" text-anchor="middle" font-family="'Cinzel', 'Trajan Pro', -apple-system, BlinkMacSystemFont, 'Inter', serif" 
+        font-size="40" font-weight="700" letter-spacing="9" fill="#f4f4f5">
+    ANSW<tspan fill="#d4af37">RANK</tspan>
+  </text>
+  
+  <text x="400" y="640" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" 
+        font-size="12" font-weight="500" letter-spacing="6" fill="#71717a">
+    GENERATIVE ENGINE AUTHORITY
+  </text>
+</svg>

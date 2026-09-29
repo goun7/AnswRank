@@ -1,0 +1,40 @@
+# AnswRank Standard AEO/GEO Compliant robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /api/private/
+
+# Priority AI Search & Citation Engines (Mandatory for AEO)
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# AI Model Training and Indexing Bots
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Block Aggressive Resource Drain Scrapers
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://acibadem.com.tr/sitemap.xml
+# LLM Discovery Endpoint:
+# https://acibadem.com.tr/llms.txt

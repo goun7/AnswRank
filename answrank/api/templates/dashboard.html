@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnswRank — Swarm Mission Control & AEO/GEO Cockpit</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/logos/logo_1_citation_monogram.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #06080d;
+      --bg-surface: #0c111a;
+      --bg-card: rgba(13, 18, 30, 0.85);
+      --bg-elevated: rgba(19, 26, 42, 0.92);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(16, 185, 129, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #7e93ab;  /* 4.21:1 → 6.34:1 AA (16 Eyl a11y taraması) */
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --cyan: #00f2fe;
+      --cyan-glow: rgba(0, 242, 254, 0.2);
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --gradient-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --gradient-cyan-blue: linear-gradient(135deg, #00f2fe 0%, #3b82f6 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding-bottom: 60px;
+      background-image:
+        radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.05) 0%, transparent 45%);
+    }
+
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+
+    /* Top Executive Cockpit Header */
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 22px 0 18px; border-bottom: 1px solid var(--border-color);
+      margin-bottom: 28px;
+    }
+    .brand-group { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; }
+    .logo-svg-box {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);
+      display: grid; place-items: center; padding: 4px;
+      box-shadow: 0 0 20px var(--emerald-glow);
+    }
+    .brand-title {
+      font-size: 22px; font-weight: 900; letter-spacing: 2px; line-height: 1.1;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand-title span { color: var(--emerald); }
+    .brand-sub {
+      font-size: 9px; font-family: 'Space Grotesk', monospace; color: var(--text-dim);
+      letter-spacing: 2px; margin-top: 2px; font-weight: 700;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 14px; }
+    .live-status-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      color: var(--emerald); font-family: 'Space Grotesk', monospace;
+    }
+    .status-pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--emerald); box-shadow: 0 0 10px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    /* Top High-Level Metrics Overview Bar */
+    .cockpit-metrics-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 18px 20px; backdrop-filter: blur(16px);
+      transition: border-color 0.2s;
+    }
+    .metric-card:hover { border-color: rgba(255, 255, 255, 0.15); }
+    .metric-label { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-val {
+      font-size: 26px; font-weight: 900; font-family: 'Space Grotesk', monospace;
+      margin: 6px 0 2px; color: #fff;
+    }
+    .metric-sub { font-size: 12px; color: var(--text-dim); }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex; gap: 8px; border-bottom: 1px solid var(--border-color);
+      margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .tab-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 12px 18px; font-size: 14px; font-weight: 700; font-family: inherit;
+      cursor: pointer; border-radius: 12px 12px 0 0; position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.03); }
+    .tab-btn.active {
+      color: var(--emerald); background: rgba(16, 185, 129, 0.06);
+    }
+    .tab-btn.active::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 3px;
+      background: var(--gradient-emerald); border-radius: 99px;
+    }
+
+    /* Tab Panes */
+    .tab-pane { display: none; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .tab-pane.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Common Card Styling */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 20px; padding: 28px; margin-bottom: 24px;
+      backdrop-filter: blur(16px); position: relative;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap; gap: 12px;
+    }
+    .card-title {
+      font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px;
+    }
+    .card-badge {
+      font-size: 11px; font-family: 'Space Grotesk', monospace;
+      padding: 3px 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted); font-weight: 700;
+    }
+
+    /* Forms */
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    input[type="text"], input[type="number"], select, textarea {
+      background: rgba(8, 12, 20, 0.9); border: 1px solid var(--border-color);
+      color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px;
+      font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: var(--emerald); box-shadow: 0 0 16px var(--emerald-glow);
+    }
+    textarea { resize: vertical; min-height: 80px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    .btn-action {
+      background: var(--gradient-emerald); color: #000; font-weight: 900; border: none;
+      padding: 13px 26px; border-radius: 12px; font-size: 14px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; font-family: inherit;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-action:hover {
+      transform: translateY(-1px); box-shadow: 0 8px 20px var(--emerald-glow); filter: brightness(1.1);
+    }
+    .btn-action:active { transform: scale(0.98); }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06); color: #fff; font-weight: 600;
+      border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 10px;
+      font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.12); }
+
+    /* Pipeline Step Progress Visualizer */
+    .pipeline-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .pipe-step {
+      background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 16px; position: relative; transition: all 0.3s;
+    }
+    .pipe-step.running {
+      border-color: var(--emerald); background: rgba(16, 185, 129, 0.06);
+      box-shadow: 0 0 20px var(--emerald-glow);
+    }
+    .pipe-step.completed {
+      border-color: var(--emerald); background: rgba(16, 185, 129, 0.04);
+    }
+    .pipe-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .pipe-num { font-size: 11px; font-family: 'Space Grotesk', monospace; color: var(--text-dim); }
+    .pipe-status-tag {
+      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 99px;
+      background: rgba(255, 255, 255, 0.05); color: var(--text-dim);
+    }
+    .pipe-step.running .pipe-status-tag { background: rgba(16, 185, 129, 0.2); color: var(--emerald); }
+    .pipe-step.completed .pipe-status-tag { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
+    .pipe-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .pipe-desc { font-size: 12px; color: var(--text-muted); line-height: 1.35; }
+
+    /* Terminal Output */
+    .terminal-box {
+      background: #040609; border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px; padding: 20px; font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; margin-bottom: 24px;
+    }
+    .terminal-top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .terminal-stream-logs {
+      height: 180px; overflow-y: auto; display: flex; flex-direction: column;
+      gap: 6px; scroll-behavior: smooth;
+    }
+    .t-log { color: var(--text-muted); line-height: 1.45; }
+    .t-log span.agent-scout { color: var(--cyan); font-weight: 700; }
+    .t-log span.agent-auditor { color: var(--emerald); font-weight: 700; }
+    .t-log span.agent-hunter { color: #a78bfa; font-weight: 700; }
+    .t-log span.agent-maker { color: var(--amber); font-weight: 700; }
+    .t-log span.agent-sentry { color: #38bdf8; font-weight: 700; }
+
+    /* Artifacts Viewer */
+    .artifact-viewer {
+      display: none; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px; margin-top: 20px;
+    }
+    .art-subnav { display: flex; gap: 8px; margin-bottom: 14px; }
+    .art-btn {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color);
+      color: var(--text-muted); padding: 6px 14px; border-radius: 8px; font-size: 12px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .art-btn.active { background: var(--emerald); color: #000; font-weight: 800; }
+    .art-content-pre {
+      background: #05070a; border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px; padding: 14px; font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: #e2e8f0; max-height: 220px; overflow-y: auto; white-space: pre-wrap;
+    }
+
+    /* 360 Deep Audit Lab */
+    .audit-result-card {
+      display: none; background: var(--bg-elevated); border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 20px; padding: 28px; margin-top: 24px;
+    }
+    .audit-header-banner {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
+    }
+    .radial-gauge-container { display: flex; align-items: center; gap: 20px; }
+    .radial-gauge { position: relative; width: 90px; height: 90px; }
+    .radial-gauge svg { transform: rotate(-90deg); width: 90px; height: 90px; }
+    .radial-gauge circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+    .r-bg { stroke: rgba(255, 255, 255, 0.08); }
+    .r-prog {
+      stroke: var(--emerald); stroke-dasharray: 238; stroke-dashoffset: 60;
+      transition: stroke-dashoffset 1s ease, stroke 0.3s ease;
+    }
+    .radial-score-num {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 24px; font-weight: 900; font-family: 'Space Grotesk', monospace;
+    }
+
+    .audit-pillars-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px;
+    }
+    .audit-pillar-tile {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 14px;
+    }
+    .tile-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .tile-bar { height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 99px; overflow: hidden; }
+    .tile-fill { height: 100%; background: var(--gradient-emerald); border-radius: 99px; transition: width 0.6s ease; }
+
+    .audit-deep-probes {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 18px; margin-bottom: 20px;
+    }
+    .probe-cell { font-size: 12px; color: var(--text-muted); }
+    .probe-cell strong { display: block; font-size: 16px; margin-top: 4px; font-family: 'Space Grotesk', monospace; }
+
+    /* Tables */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th {
+      color: var(--text-dim); font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid var(--border-color);
+    }
+    td {
+      padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Collapsible Manual Override */
+    details summary {
+      cursor: pointer; color: var(--text-muted); font-size: 13px; font-weight: 600;
+      margin-top: 14px; user-select: none;
+    }
+    details summary:hover { color: #fff; }
+
+    @media (max-width: 1024px) {
+      .cockpit-metrics-bar { grid-template-columns: repeat(2, 1fr); }
+      .pipeline-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+      .audit-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+      .audit-deep-probes { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .cockpit-metrics-bar { grid-template-columns: 1fr; }
+      .pipeline-grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; gap: 14px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Cockpit Header -->
+    <header>
+      <a href="/dashboard" class="brand-group">
+        <div class="logo-svg-box">
+          <svg viewBox="0 0 800 800" width="100%" height="100%">
+            <defs>
+              <linearGradient id="dashLogoGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#059669"/>
+                <stop offset="100%" stop-color="#34d399"/>
+              </linearGradient>
+            </defs>
+            <g transform="translate(400, 360)">
+              <path d="M -90,140 L -90,-20 C -90,-80 -40,-130 20,-130 L 20,-75 C -10,-75 -35,-50 -35,-20 L -35,140 Z" fill="#ffffff"/>
+              <path d="M 35,140 L 35,-40 L 90,15 L 90,-90 L 0,-180 L -30,-150 L 35,-85 Z" fill="url(#dashLogoGrad)"/>
+              <circle cx="-5" cy="50" r="16" fill="#10b981"/>
+              <rect x="-35" y="44" width="70" height="12" rx="6" fill="#10b981" opacity="0.8"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">ANSW<span>RANK</span></div>
+          <div class="brand-sub">SWARM MISSION CONTROL // EXECUTIVE COCKPIT</div>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <div class="live-status-pill" id="sys-status-pill">
+          <span class="status-pulse"></span>
+          <span>DURUM SORGULANIYOR...</span>
+        </div>
+        <a href="/" target="_blank" class="btn-secondary" style="text-decoration:none;">Vitrin Sayfasını Aç ↗</a>
+      </div>
+    </header>
+
+    <!-- Top High-Level Metrics Bar -->
+    <div class="cockpit-metrics-bar">
+      <div class="metric-card">
+        <div class="metric-label">Maliye & Vergi Kalkanı</div>
+        <div class="metric-val" id="top-exempt-base" style="color:var(--emerald);">₺0</div>
+        <div class="metric-sub">5520 KVK 10/1-ğ %80 İstisna</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Toplam İhracat Hasılatı</div>
+        <div class="metric-val" id="top-foreign-rev">₺0</div>
+        <div class="metric-sub">%0 KDV İstisnası Uygulandı</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Korumalı Bölge Sayısı</div>
+        <div class="metric-val" id="top-territory-count" style="color:var(--cyan);">0</div>
+        <div class="metric-sub">Anti-Yamyamlaşma Aktif</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">LLM API Harcaması</div>
+        <div class="metric-val" id="top-llm-cost" style="color:var(--amber);">$0.00</div>
+        <div class="metric-sub" id="top-llm-mode">sağlayıcı durumu sorgulanıyor...</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('scout', event)">📡 1. Otonom Pazar Avı & Aday Havuzu</button>
+      <button class="tab-btn" onclick="switchTab('audit', event)">🔬 2. 360° Derin Denetim Labı</button>
+      <button class="tab-btn" onclick="switchTab('sentiment', event)">💬 3. Zero-Click Algı Radarı</button>
+      <button class="tab-btn" onclick="switchTab('territory', event)">🔒 4. Bölge Münhasırlık Kalkanı</button>
+      <button class="tab-btn" onclick="switchTab('fiscal', event)">📊 5. Maliye & Vergi Defteri</button>
+      <button class="tab-btn" onclick="switchTab('telemetry', event)">⚡ 6. LLM API Telemetrisi</button>
+    </div>
+
+    <!-- TAB 1: OTONOM PAZAR AVI & ADAY HAVUZU -->
+    <div id="pane-scout" class="tab-pane active">
+      <!-- Scout Launcher Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📡 Ajan 01 (Radar): Otonom Pazar Taraması</span>
+            <span class="card-badge" id="scout-source-badge" style="background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.4); color:var(--amber);">KÜRATÖRLÜ DEMO HEDEF HAVUZU</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">Sektör ve lokasyon seçin; Ajan 01 yüksek LTV'li hedefleri kendisi bulup sıraya alsın.</span>
+        </div>
+
+        <div style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:200px;">
+            <label class="form-label">Hedef Sektör (Niche)</label>
+            <select id="scout-sector">
+              <option value="dental" selected>Diş Hekimliği & İmplant (Dental)</option>
+              <option value="aesthetic">Estetik & Plastik Cerrahi</option>
+              <option value="accounting">Yeminli Mali Müşavir (CPA/SMMM)</option>
+              <option value="general">Genel Yüksek Biletli Hizmetler</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:200px;">
+            <label class="form-label">Hedef Pazar & Şehir</label>
+            <select id="scout-market">
+              <option value="London|UK" selected>🇬🇧 Londra (UK) — Harley Street & Kensington</option>
+              <option value="İstanbul|TR">🇹🇷 İstanbul (TR) — Maslak, Nişantaşı & Beşiktaş</option>
+              <option value="Berlin|DE">🇩🇪 Berlin (DE) — Mitte & Kurfürstendamm</option>
+              <option value="Beverly Hills|US">🇺🇸 Beverly Hills / NYC (US)</option>
+            </select>
+          </div>
+          <button class="btn-action" id="btn-trigger-scout" onclick="triggerAutonomousScout()">
+            <span>📡 RADAR'I PAZAR TARAMASINA GÖNDER</span>
+          </button>
+        </div>
+
+        <!-- Optional Manual Seed details (Collapsible) -->
+        <details>
+          <summary>Manuel Aday Ekleme (Override / Özel Test Modu)</summary>
+          <div class="form-grid" style="margin-top:14px;">
+            <div class="form-group">
+              <label class="form-label">Marka Adı</label>
+              <input type="text" id="man-brand" placeholder="Örn: Meridyen Diş Kliniği">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Domain</label>
+              <input type="text" id="man-domain" placeholder="meridyen-klinik.example">
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-end;">
+              <button class="btn-secondary" style="width:100%; padding:13px;" onclick="manualSeedCandidate()">Adayı Sıraya Ekle ↵</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Autonomous Discovered Candidates Queue -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎯 Ajanlar Tarafından Keşfedilen Aday Havuzu</span>
+            <span class="card-badge" id="cand-count-badge">0 Aday</span>
+          </div>
+          <button class="btn-secondary" onclick="loadSwarmCandidates()">Yenile ↻</button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Aday Marka</th>
+                <th>Domain</th>
+                <th>Sektör / Şehir</th>
+                <th>Tahmini Bilet</th>
+                <th>Ajan Aşaması</th>
+                <th>Son Eylem</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="candidates-table-body">
+              <tr><td colspan="7" style="text-align:center; color:var(--text-dim);">Adaylar taranıyor...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5-Stage Live Visualizer -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔄 5 Aşamalı Operasyonel Pipeline</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);" id="swarm-exec-id">Hazır</span>
+        </div>
+
+        <div class="pipeline-grid">
+          <div class="pipe-step" id="pipe-01">
+            <div class="pipe-top"><span class="pipe-num">1. AŞAMA</span><span class="pipe-status-tag" id="tag-01">BEKLİYOR</span></div>
+            <div class="pipe-name">Radar (Pazar Keşfi)</div>
+            <div class="pipe-desc">Aday tespiti ve LTV yeterlilik süzgeci.</div>
+          </div>
+          <div class="pipe-step" id="pipe-02">
+            <div class="pipe-top"><span class="pipe-num">2. AŞAMA</span><span class="pipe-status-tag" id="tag-02">BEKLİYOR</span></div>
+            <div class="pipe-name">Analist (360° Teşhis)</div>
+            <div class="pipe-desc">Bot görünürlüğü, WAF ve ciro kaybı tespiti.</div>
+          </div>
+          <div class="pipe-step" id="pipe-03">
+            <div class="pipe-top"><span class="pipe-num">3. AŞAMA</span><span class="pipe-status-tag" id="tag-03">BEKLİYOR</span></div>
+            <div class="pipe-name">Strateji (Yönetici Dosyası)</div>
+            <div class="pipe-desc">1 sayfalık Şok Dosyası ve itiraz savunması.</div>
+          </div>
+          <div class="pipe-step" id="pipe-04">
+            <div class="pipe-top"><span class="pipe-num">4. AŞAMA</span><span class="pipe-status-tag" id="tag-04">BEKLİYOR</span></div>
+            <div class="pipe-name">Üretim (Teknik Dağıtım)</div>
+            <div class="pipe-desc">Madde 7 sözleşmesi, llms.txt ve JSON-LD üretimi.</div>
+          </div>
+          <div class="pipe-step" id="pipe-05">
+            <div class="pipe-top"><span class="pipe-num">5. AŞAMA</span><span class="pipe-status-tag" id="tag-05">BEKLİYOR</span></div>
+            <div class="pipe-name">Koruma (Bölge Kilidi)</div>
+            <div class="pipe-desc">Şehir münhasırlığı ve 30 günlük alıntı takibi.</div>
+          </div>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="terminal-box">
+          <div class="terminal-top-bar">
+            <span style="color:var(--text-dim); font-size:12px;">CANLI AJAN TELEMETRİ AKIŞI // SSE STREAM</span>
+            <button onclick="clearTerminalLogs()" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px;">Temizle</button>
+          </div>
+          <div class="terminal-stream-logs" id="swarm-live-logs">
+            <div class="t-log">[SİSTEM] Otonom Sürü bekleme modunda. Radar pazar taraması başlattığında canlı telemetri akacaktır.</div>
+          </div>
+        </div>
+
+        <!-- Generated Artifacts Viewer -->
+        <div class="artifact-viewer" id="swarm-artifact-viewer">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div class="art-subnav">
+              <button class="art-btn active" onclick="showArtifact('llms', event)">llms.txt</button>
+              <button class="art-btn" onclick="showArtifact('schema', event)">schema.jsonld</button>
+              <button class="art-btn" onclick="showArtifact('robots', event)">robots.txt</button>
+              <button class="art-btn" onclick="showArtifact('pitch', event)">Outreach Pitch</button>
+            </div>
+            <button class="btn-secondary" onclick="copyActiveArtifact()">Panoya Kopyala</button>
+          </div>
+          <pre class="art-content-pre" id="art-display-pre">// Çıktı bekleniyor...</pre>
+
+          <!-- One-Click Deployer Module -->
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:#fff;">Tek Tıkla Canlı Dağıtım (One-Click CMS Deployer)</div>
+              <div style="font-size:12px; color:var(--text-muted);">Üretilen AEO paketini doğrudan WordPress, Webhook veya yerel arşive gönderin.</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <select id="deploy-target-select" style="padding:8px 12px; font-size:12px;">
+                <option value="local">Yerel Paket (dist_aeo/)</option>
+                <option value="webhook">REST Webhook</option>
+                <option value="wordpress">WordPress REST API</option>
+              </select>
+              <button class="btn-action" style="padding:8px 16px; font-size:12px;" onclick="triggerOneClickDeploy()">Dağıtımı Başlat ↗</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 360 DERİN DENETİM LABI -->
+    <div id="pane-audit" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔬 360° Derin AEO & GEO Denetim Laboratuvarı</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">WAF Spoofing, Adversarial Risk & RAG Skorlama</span>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+          <div class="form-group">
+            <label class="form-label">Hedef URL</label>
+            <input type="text" id="da-url" placeholder="https://ornek-klinik.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marka Adı</label>
+            <input type="text" id="da-brand" placeholder="Örn: Örnek Diş Kliniği">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sektör</label>
+            <select id="da-sector">
+              <option value="dental">Dental</option>
+              <option value="aesthetic">Estetik</option>
+              <option value="accounting">Mali Müşavirlik</option>
+              <option value="general" selected>Genel Sağlık / Hizmet</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn-action" id="btn-run-deep-audit" onclick="executeDeepAudit()">
+            <span>360° DERİN DENETİMİ ÇALIŞTIR</span>
+          </button>
+        </div>
+
+        <!-- Deep Audit Results (all fields render from real API data only) -->
+        <div class="audit-result-card" id="deep-audit-results">
+          <div class="audit-header-banner">
+            <div>
+              <h3 id="da-res-domain" style="font-size:22px; font-weight:800;">—</h3>
+              <div style="font-size:12px; color:var(--text-dim); margin-top:2px;">8 kategori ağırlıkları + WAF/Adversarial/Grounding kompoziti</div>
+            </div>
+            <div class="radial-gauge-container">
+              <div class="radial-gauge">
+                <svg>
+                  <circle class="r-bg" cx="45" cy="45" r="38"></circle>
+                  <circle class="r-prog" id="da-gauge-circle" cx="45" cy="45" r="38"></circle>
+                </svg>
+                <div class="radial-score-num" id="da-score-val">--</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:var(--text-muted);">KOMPOZİT DERECELENDİRME</div>
+                <div style="font-size:10px; color:var(--text-dim); max-width:230px; line-height:1.35;">
+                  AEO/GEO denetim skoru (sorgu-bağımsız); ölçülmüş canlı-atıf görünürlüğü değildir.
+                </div>
+                <div style="font-size:18px; font-weight:800; color:var(--text-muted);" id="da-tier-val">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="audit-pillars-grid">
+            <div class="audit-pillar-tile">
+              <div class="tile-top"><span>AI Crawlers</span><span id="dp-crawlers">--</span></div>
+              <div class="tile-bar"><div class="tile-fill" id="dp-bar-crawlers" style="width:0%;"></div></div>
+            </div>
+            <div class="audit-pillar-tile">
+              <div class="tile-top"><span>llms.txt Yapısı</span><span id="dp-llms">--</span></div>
+              <div class="tile-bar"><div class="tile-fill" id="dp-bar-llms" style="width:0%;"></div></div>
+            </div>
+            <div class="audit-pillar-tile">
+              <div class="tile-top"><span>Schema.org JSON-LD</span><span id="dp-schema">--</span></div>
+              <div class="tile-bar"><div class="tile-fill" id="dp-bar-schema" style="width:0%;"></div></div>
+            </div>
+            <div class="audit-pillar-tile">
+              <div class="tile-top"><span>Hiyerarşi & Başlıklar</span><span id="dp-headers">--</span></div>
+              <div class="tile-bar"><div class="tile-fill" id="dp-bar-headers" style="width:0%;"></div></div>
+            </div>
+          </div>
+
+          <div class="audit-deep-probes">
+            <div class="probe-cell">
+              WAF SILENT BLOCKING
+              <strong style="color:var(--text-dim);" id="dp-probe-waf">—</strong>
+            </div>
+            <div class="probe-cell">
+              ADVERSARIAL RISK
+              <strong style="color:var(--text-dim);" id="dp-probe-adv">—</strong>
+            </div>
+            <div class="probe-cell">
+              WIKIDATA GROUNDING
+              <strong style="color:var(--text-dim);" id="dp-probe-wiki">—</strong>
+            </div>
+            <div class="probe-cell">
+              ALINTI PAYI (SoV)
+              <strong style="color:var(--text-dim);" id="dp-probe-cite">—</strong>
+            </div>
+            <div class="probe-cell">
+              TAHMİNİ AYLIK CİRO KAYBI*
+              <strong style="color:var(--text-dim);" id="dp-probe-loss">—</strong>
+            </div>
+          </div>
+          <div style="font-size:10px; color:var(--text-dim); margin-top:6px;">* Ciro kaybı bir model tahminidir (sektör LTV × skor açığı × çarpan), ölçülmüş gerçek kayıp değildir.</div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <a href="#" id="da-full-report-btn" target="_blank" class="btn-action" style="background:rgba(255,255,255,0.08); color:#fff; display:none;">
+              Tam HTML Raporunu Aç ↗
+            </a>
+          </div>
+        </div>
+        <div id="da-error-box" style="display:none; margin-top:16px; padding:14px 16px; border-radius:12px; background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.35); color:var(--rose); font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ZERO-CLICK DUYGU VE ALGI RADARI -->
+    <div id="pane-sentiment" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>💬 Zero-Click Duygu & Algı Radarı (Sentiment Analyzer)</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">LLM yanıtlarındaki marka güvenliğini ve duygu polaritesini ölçün</span>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="form-group">
+            <label class="form-label">Marka Adı</label>
+            <input type="text" id="sent-brand" placeholder="Örn: Örnek Diş Kliniği">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sektör</label>
+            <select id="sent-sector">
+              <option value="dental">Dental</option>
+              <option value="aesthetic">Estetik</option>
+              <option value="general" selected>Genel Sağlık</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label">LLM Cevap Metni (ChatGPT, Perplexity veya Gemini Çıktısı)</label>
+          <textarea id="sent-raw-text" rows="4" placeholder="Analiz edilecek LLM cevabını buraya yapıştırın; ör. &quot;X Kliniği, güncel teknoloji ve uzman kadrosuyla bölgenin önde gelen sağlık kuruluşlarındandır.&quot;"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn-action" onclick="analyzeSentiment()">
+            <span>DUYGU & GÜVENLİK ANALİZİ YAP</span>
+          </button>
+        </div>
+
+        <div id="sent-results-box" style="display:none; margin-top:24px; background:rgba(0,0,0,0.4); border:1px solid var(--border-color); border-radius:16px; padding:24px;">
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:18px;">
+            <div class="probe-cell">
+              DUYGU SKORU (POLARİTE)
+              <strong style="color:var(--emerald);" id="sent-score-val">—</strong>
+            </div>
+            <div class="probe-cell">
+              MARKA GÜVENLİĞİ
+              <strong style="color:var(--cyan);" id="sent-safety-val">—</strong>
+            </div>
+            <div class="probe-cell">
+              TESPİT EDİLEN RİSK BAYRAKLARI
+              <strong style="color:var(--text-dim);" id="sent-clarity-val">—</strong>
+            </div>
+          </div>
+          <div id="sent-error" style="display:none; margin-top:16px; padding:14px 16px; border-radius:12px; background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.35); color:var(--rose); font-size:13px;"></div>
+          <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Bağlam Alıntısı & Karşı-Alıntı Stratejisi:</div>
+          <div id="sent-quotes-container" style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--emerald);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: BÖLGE MÜNHASIRLIK KALKANI -->
+    <div id="pane-territory" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔒 Bölge Münhasırlık Kalkanı (Anti-Cannibalization Shield)</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">Aynı bölge ve sektörde ikinci bir rakibe hizmet verilmesi engellenir</span>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Korumalı Marka</th>
+                <th>Sektör (Niche)</th>
+                <th>Şehir / Ülke</th>
+                <th>Münhasırlık Durumu</th>
+                <th>Kilit Başlangıcı</th>
+              </tr>
+            </thead>
+            <tbody id="territory-table-body">
+              <tr>
+                <td colspan="5" style="text-align:center; color:var(--text-dim);">Aktif kilitler yükleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: MALİYE VE VERGİ DEFTERİ -->
+    <div id="pane-fiscal" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📊 Maliye & İhracat Vergi Kalkanı (5520 KVK 10/1-ğ & 3065 KDV 11/1-a)</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">SMMM / YMM Uyumlu Otomatik Vergi İndirim Defteri</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:24px;">
+          <div class="metric-card">
+            <div class="metric-label">Toplam İhracat Geliri</div>
+            <div class="metric-val" id="fisc-tot-rev" style="color:#fff;">₺0</div>
+            <div class="metric-sub">UK, US ve DE Müşteri Faturaları</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">%80 Vergiden Muaf Matrah</div>
+            <div class="metric-val" id="fisc-exempt-base" style="color:var(--emerald);">₺0</div>
+            <div class="metric-sub">KVK 10/1-ğ Kanuni İndirim</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Efektif Vergi Kalkanı</div>
+            <div class="metric-val" id="fisc-shield-pct" style="color:var(--cyan);">%0</div>
+            <div class="metric-sub">Net Kar Artış Oranı</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>İşlem ID</th>
+                <th>Marka / Müşteri</th>
+                <th>Ülke</th>
+                <th>Orijinal Döviz</th>
+                <th>TRY Karşılığı</th>
+                <th>%80 Muaf Matrah</th>
+                <th>KDV Oranı</th>
+              </tr>
+            </thead>
+            <tbody id="fiscal-table-body">
+              <tr>
+                <td colspan="7" style="text-align:center; color:var(--text-dim);">Kayıtlar yükleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: LLM API TELEMETRİSİ -->
+    <div id="pane-telemetry" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>⚡ Hibrit LLM API Telemetrisi & Harcama Yönetimi</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">Perplexity Sonar, OpenAI GPT-4o, Anthropic Claude & Gemini</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:24px;">
+          <div class="metric-card">
+            <div class="metric-label">Yapılandırılmış Sağlayıcılar</div>
+            <div class="metric-val" id="tel-providers" style="font-size:18px; color:var(--cyan);">—</div>
+            <div class="metric-sub" id="tel-providers-sub">sağlayıcı anahtarı sorgulanıyor...</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Canlı / Sentetik Koşum</div>
+            <div class="metric-val" id="tel-calls" style="color:var(--emerald);">0 / 0</div>
+            <div class="metric-sub">Fallback ve Dayanıklılık Oranı</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Kümülatif API Maliyeti</div>
+            <div class="metric-val" id="tel-cost" style="color:var(--amber);">$0.000</div>
+            <div class="metric-sub">Token Başına Maliyet Takibi</div>
+          </div>
+        </div>
+
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Aktif Sağlayıcı Gecikme & Sağlık Matrisi <span style="color:var(--text-dim);">(gerçek telemetriden üretilir):</span></div>
+        <div id="tel-provider-rows" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:13px; color:var(--text-dim); padding:14px;">Telemetri bekleniyor...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- E1 GEO İzleme paneli — yalnız gerçek /api/monitors verisi; boş durum dürüst etiketlidir -->
+    <div class="card" id="monitor-panel">
+      <div class="card-header">
+        <div class="card-title">
+          <h2>GEO İzleme</h2>
+          <span class="card-badge" id="monitor-count-badge">0 İzleme</span>
+        </div>
+      </div>
+      <div id="monitor-rows" style="padding:10px 0; font-size:13px;">
+        <p style="color:var(--text-muted);">İzleme kaydı yükleniyor… (API'siz hiçbir sayı bu panelde yeramaz)</p>
+      </div>
+    </div>
+
+
+
+    <!-- Onay Kuyruğu — tek insan-karar yüzeyi; yalnız gerçek /api/queue verisi -->
+    <div class="card" id="queue-panel">
+      <div class="card-header">
+        <div class="card-title">
+          <h2>Onay Kuyruğu</h2>
+          <span class="card-badge" id="queue-count-badge">0 Bekleyen</span>
+        </div>
+      </div>
+      <div id="queue-rows" style="padding:10px 0; font-size:13px;">
+        <p style="color:var(--text-muted);">Kuyruk yükleniyor… (onaysız hiçbir madde dışarı çıkmaz)</p>
+      </div>
+    </div>
+  <script>
+    async function loadMonitors() {
+      const box = document.getElementById('monitor-rows');
+      const badge = document.getElementById('monitor-count-badge');
+      try {
+        const resp = await fetch('/api/monitors');
+        const data = await resp.json();
+        const mons = data.monitors || [];
+        badge.textContent = mons.length + ' İzleme';
+        if (!mons.length) {
+          box.innerHTML = '<p style="color:var(--text-muted);">Kayıtlı izleme yok — panel boş, sayı uydurulmaz. İlk kayıt: POST /api/monitors</p>';
+          return;
+        }
+        let html = '';
+        for (const m of mons) {
+          let digest = { status: 'ÖLÇÜLEMEDİ', delta_base: null, text: '' };
+          let ful = { kind: 'ÖLÇÜLEMEDİ', reason: '' };
+          try { digest = await (await fetch(`/api/monitors/${m.id}/digest`)).json(); } catch (e) {}
+          try { ful = await (await fetch(`/api/monitors/${m.id}/fulfillment`)).json(); } catch (e) {}
+          const delta = (digest.delta_base === null || digest.delta_base === undefined)
+            ? '<span style="color:var(--amber);">Δ ÖLÇÜLEMEDİ</span>'
+            : `Δ +${digest.delta_base.toFixed(1)} puan (ölçümlü)`;
+          html += `<div style="display:flex; gap:14px; flex-wrap:wrap; padding:8px 0; border-bottom:1px solid rgba(148,163,184,.12);">
+            <strong>${m.domain}</strong><span style="color:var(--text-muted);">${m.sector}</span>
+            <span>${digest.status}</span><span>${delta}</span>
+            <span style="color:${ful.kind === 'TRIGGERED' ? 'var(--red,#f87171)' : 'var(--text-muted)'};">7.3: ${ful.kind}</span>
+          </div>`;
+        }
+        box.innerHTML = html;
+      } catch (err) {
+        box.innerHTML = '<p style="color:var(--amber);">İzleme API\'sine ulaşılamadı — ÖLÇÜLEMEDİ (sayı uydurulmaz).</p>';
+      }
+    }
+
+    // ── Honest-by-default dashboard ─────────────────────────────────────────
+    // All values render from real API responses only. No fabricated fallbacks:
+    // missing data renders as "—/Ölçülmedi/Taranmadı", errors surface as errors.
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    let activeArtifactsData = {};
+    let activeArtifactKey = 'llms';
+    let CANDS_BY_ID = {};
+    let currentActiveCandidate = { brand_name: '', domain: '', sector: '', city: '', country: '' };
+
+    function switchTab(tabId, evt) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+      const targetPane = document.getElementById('pane-' + tabId);
+      if (targetPane) targetPane.classList.add('active');
+      if (tabId === 'scout') loadSwarmCandidates();
+    }
+
+    function appendSwarmLog(html) {
+      const container = document.getElementById('swarm-live-logs');
+      if (!container) return;
+      const div = document.createElement('div');
+      div.className = 't-log';
+      div.innerHTML = html;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function nowTs() { return new Date().toISOString().substring(11, 19); }
+
+    function clearTerminalLogs() {
+      const container = document.getElementById('swarm-live-logs');
+      if (container) container.innerHTML = '';
+    }
+
+    // Trigger Curated-Seed Scout (honestly labeled when the source is a demo pool)
+    async function triggerAutonomousScout() {
+      const sector = document.getElementById('scout-sector').value;
+      const marketVal = document.getElementById('scout-market').value.split('|');
+      const city = marketVal[0];
+      const country = marketVal[1];
+      const btn = document.getElementById('btn-trigger-scout');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>📡 HEDEF HAVUZU TARANIYOR...</span>';
+      appendSwarmLog(`[${nowTs()}] <span class="agent-scout">RADAR (SCOUT):</span> ${esc(city)}, ${esc(country)} · ${esc(sector)} hedef havuzu taranıyor...`);
+      animatePipelineStep(1);
+
+      try {
+        const resp = await fetch('/api/swarm/scout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sector: sector, city: city, country: country })
+        });
+        if (!resp.ok) {
+          const detail = (await resp.text() || '').slice(0, 160);
+          appendSwarmLog(`[${nowTs()}] <span class="agent-scout">HATA:</span> Scout çağrısı başarısız (HTTP ${resp.status}) ${esc(detail)}`);
+          resetPipelineSteps();
+          return;
+        }
+        const data = await resp.json();
+        if (data.source === 'curated_demo_pool') {
+          appendSwarmLog(`[${nowTs()}] <span class="agent-scout">RADAR (SCOUT):</span> ⚠ ${data.count} aday KÜRATÖRLÜ DEMO HAVUZUNDAN eklendi (canlı dizin keşfi değil; bilet değerleri heuristiktir).`);
+          const badge = document.getElementById('scout-source-badge');
+          if (badge) { badge.textContent = 'KAYNAK: KÜRATÖRLÜ DEMO HAVUZU'; badge.style.display = 'inline-block'; }
+        } else {
+          appendSwarmLog(`[${nowTs()}] <span class="agent-scout">RADAR (SCOUT):</span> ${esc(data.count)} aday keşfedildi.`);
+        }
+        await loadSwarmCandidates();
+      } catch (err) {
+        appendSwarmLog(`[${nowTs()}] <span class="agent-scout">HATA:</span> Scout isteği ağ hatası verdi: ${esc(String(err))}`);
+        resetPipelineSteps();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📡 HEDEF HAVUZUNU TARA</span>';
+      }
+    }
+
+    // Load Discovered Candidates Queue
+    async function loadSwarmCandidates() {
+      const tbody = document.getElementById('candidates-table-body');
+      try {
+        const resp = await fetch('/api/swarm/candidates');
+        if (!resp.ok) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--rose);">Adaylar yüklenemedi (HTTP ${resp.status})</td></tr>`;
+          return;
+        }
+        const candidates = await resp.json();
+        CANDS_BY_ID = {};
+        document.getElementById('cand-count-badge').innerText = `${candidates.length} Aday`;
+        if (candidates.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-dim);">Henüz keşfedilmiş aday yok. Radar taraması başlatın.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = candidates.map(c => {
+          CANDS_BY_ID[c.id] = c;
+          const stageColor = c.stage === 'DELTA_CHECKED' ? 'var(--emerald)' : (c.stage === 'DISCOVERED' ? 'var(--cyan)' : 'var(--amber)');
+          return `
+            <tr>
+              <td><strong>${esc(c.brand_name)}</strong></td>
+              <td><span style="font-family:'JetBrains Mono'; font-size:12px; color:var(--text-muted);">${esc(c.domain)}</span></td>
+              <td>${esc(c.sector)} · ${esc(c.city)}, ${esc(c.country)}</td>
+              <td style="color:var(--emerald); font-weight:700;">${esc(c.currency)} ${Number(c.ticket_size || 0).toLocaleString('tr-TR')}</td>
+              <td><span class="card-badge" style="color:${stageColor}">${esc(c.stage)}</span></td>
+              <td style="font-size:12px; color:var(--text-muted); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(c.last_action || '-')}</td>
+              <td>
+                <button class="btn-secondary" style="padding:6px 12px; font-size:11px;" onclick="runCandidateSwarmById('${esc(c.id)}')">
+                  ⚡ Sürüyü Çalıştır
+                </button>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--rose);">Aday yüklenirken hata: ${esc(String(e))}</td></tr>`;
+      }
+    }
+
+    function runCandidateSwarmById(candId) {
+      const c = CANDS_BY_ID[candId];
+      if (!c) return alert('Aday bulunamadı — listeyi yenileyin.');
+      return runCandidateSwarm(c.id, c.brand_name, c.domain, c.city, c.country, c.sector);
+    }
+
+    // Run Swarm Pipeline on a specific candidate
+    async function runCandidateSwarm(candId, brand, domain, city, country, sector) {
+      currentActiveCandidate = { brand_name: brand, domain: domain, city: city, country: country, sector: sector || 'dental' };
+      appendSwarmLog(`[${nowTs()}] <span class="agent-scout">SİSTEM:</span> Aday pipeline'a alındı: ${esc(brand)} (${esc(domain)})`);
+      markAllStepsRunning();
+
+      let evtSource = null;
+      try {
+        const sseUrl = `/api/swarm/stream?brand=${encodeURIComponent(brand)}&domain=${encodeURIComponent(domain)}&city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}`;
+        evtSource = new EventSource(sseUrl);
+        evtSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            appendSwarmLog(`[${String(data.timestamp || '').substring(11, 19)}] <span class="agent-${agentClass(data.agent)}">${esc(data.agent)}:</span> ${esc(data.message)}`);
+          } catch (err) { /* malformed frame: ignore this line only */ }
+        };
+        evtSource.onerror = () => evtSource.close();
+
+        const resp = await fetch(`/api/swarm/candidates/${encodeURIComponent(candId)}/run`, { method: 'POST' });
+        if (resp.ok) {
+          const res = await resp.json();
+          completePipelineSteps();
+          displaySwarmArtifacts(res);
+          loadSwarmCandidates();
+          loadDashboardMetrics();
+        } else {
+          const detail = (await resp.text() || '').slice(0, 160);
+          appendSwarmLog(`[${nowTs()}] <span class="agent-sentry">HATA:</span> Pipeline başarısız (HTTP ${resp.status}) ${esc(detail)}`);
+          resetPipelineSteps();
+        }
+      } catch (err) {
+        appendSwarmLog(`[${nowTs()}] <span class="agent-sentry">HATA:</span> Pipeline ağ hatası: ${esc(String(err))}`);
+        resetPipelineSteps();
+      } finally {
+        if (evtSource) evtSource.close();
+      }
+    }
+
+    function agentClass(agentName) {
+      const a = String(agentName || '').toLowerCase();
+      if (a.includes('auditor') || a.includes('analyst')) return 'auditor';
+      if (a.includes('hunter')) return 'hunter';
+      if (a.includes('fulfillment') || a.includes('maker')) return 'maker';
+      if (a.includes('sentry')) return 'sentry';
+      return 'scout';
+    }
+
+    async function manualSeedCandidate() {
+      const brand = document.getElementById('man-brand').value.trim();
+      const domain = document.getElementById('man-domain').value.trim();
+      if (!brand || !domain) return alert('Marka ve domain girilmelidir.');
+
+      try {
+        const resp = await fetch('/api/swarm/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brand_name: brand,
+            domain: domain,
+            sector: 'general',
+            city: 'İstanbul',
+            country: 'TR',
+            currency: 'TRY',
+            ticket_size: 25000.0
+          })
+        });
+        if (!resp.ok) {
+          const detail = (await resp.text() || '').slice(0, 160);
+          return alert(`Aday işlenemedi (HTTP ${resp.status}): ${detail}`);
+        }
+        const res = await resp.json();
+        completePipelineSteps();
+        displaySwarmArtifacts(res);
+        loadSwarmCandidates();
+        loadDashboardMetrics();
+        alert('Aday işlendi ve pipeline tamamlandı.');
+      } catch (e) {
+        alert(`Aday işlenemedi — ağ hatası: ${e}`);
+      }
+    }
+
+    function animatePipelineStep(stepNum) {
+      if (stepNum > 5) return;
+      const step = document.getElementById('pipe-0' + stepNum);
+      const tag = document.getElementById('tag-0' + stepNum);
+      step.classList.add('running');
+      tag.innerText = 'ÇALIŞIYOR';
+    }
+
+    function markAllStepsRunning() {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById('pipe-0' + i).className = 'pipe-step running';
+        document.getElementById('tag-0' + i).innerText = 'ÇALIŞIYOR';
+      }
+    }
+
+    function resetPipelineSteps() {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById('pipe-0' + i).className = 'pipe-step';
+        document.getElementById('tag-0' + i).innerText = 'BEKLİYOR';
+      }
+      document.getElementById('swarm-exec-id').innerText = 'Pipeline tamamlanmadı — hata günlüğünü kontrol edin';
+    }
+
+    function completePipelineSteps() {
+      for (let i = 1; i <= 5; i++) {
+        const step = document.getElementById('pipe-0' + i);
+        const tag = document.getElementById('tag-0' + i);
+        step.className = 'pipe-step completed';
+        tag.innerText = 'TAMAMLANDI';
+      }
+      document.getElementById('swarm-exec-id').innerText = '✅ Pipeline Başarıyla Tamamlandı';
+    }
+
+    function displaySwarmArtifacts(res) {
+      const f = (res && res.fixes) || {};
+      activeArtifactsData = {
+        llms: f.llms_txt || '// llms.txt bu yanıtta üretilmedi',
+        schema: f.schema_jsonld || '// JSON-LD bu yanıtta üretilmedi',
+        robots: f.robots_txt || '// robots.txt bu yanıtta üretilmedi',
+        pitch: res.outreach_pitch || '// Outreach metni bu yanıtta üretilmedi'
+      };
+      if (typeof activeArtifactsData.schema === 'object') {
+        activeArtifactsData.schema = JSON.stringify(activeArtifactsData.schema, null, 2);
+      }
+      document.getElementById('swarm-artifact-viewer').style.display = 'block';
+      showArtifact('llms');
+    }
+
+    function showArtifact(key, evt) {
+      activeArtifactKey = key;
+      document.querySelectorAll('.art-btn').forEach(b => b.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+      const content = activeArtifactsData[key] || '// Veri bulunamadı';
+      document.getElementById('art-display-pre').innerText = content;
+    }
+
+    function copyActiveArtifact() {
+      const content = activeArtifactsData[activeArtifactKey] || '';
+      navigator.clipboard.writeText(content).then(() => {
+        alert('Varlık panoya kopyalandı!');
+      }).catch(() => alert('Panoya kopyalanamadı (tarayıcı izni).'));
+    }
+
+    async function triggerOneClickDeploy() {
+      const target = document.getElementById('deploy-target-select').value;
+      if (!currentActiveCandidate.domain) return alert('Önce bir aday üzerinde pipeline çalıştırın.');
+      try {
+        const resp = await fetch('/api/deploy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brand_name: currentActiveCandidate.brand_name,
+            domain: currentActiveCandidate.domain,
+            target: target,
+            sector: currentActiveCandidate.sector || 'dental',
+            city: currentActiveCandidate.city || 'London',
+            output_dir: './dist_aeo'
+          })
+        });
+        const res = await resp.json().catch(() => ({}));
+        if (resp.ok) {
+          alert(`✅ Dağıtım Başarılı!\nHedef: ${res.target || target}\nDosyalar: ${(res.exported_files || []).join(', ') || 'Senkronize edildi'}`);
+        } else {
+          alert(`❌ Dağıtım BAŞARISIZ (HTTP ${resp.status}): ${res.detail || 'bilinmeyen hata'}`);
+        }
+      } catch (e) {
+        alert(`❌ Dağıtım isteği gönderilemedi (ağ hatası): ${e}`);
+      }
+    }
+
+    async function executeDeepAudit() {
+      const url = document.getElementById('da-url').value.trim();
+      const brand = document.getElementById('da-brand').value.trim();
+      const sector = document.getElementById('da-sector').value;
+      const btn = document.getElementById('btn-run-deep-audit');
+      const resCard = document.getElementById('deep-audit-results');
+      const errBox = document.getElementById('da-error-box');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>360° DENETLENİYOR (canlı WAF probu + adversarjal tarama — 1-2 dk sürebilir)...</span>';
+      errBox.style.display = 'none';
+      resCard.style.display = 'none';
+
+      try {
+        const resp = await fetch('/api/audit/deep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: url,
+            brand_name: brand,
+            sector: sector,
+            probe_waf: true,
+            check_adversarial: true,
+            check_grounding: true,
+            check_rag: true
+          })
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          errBox.textContent = `❌ Denetim başarısız (HTTP ${resp.status}): ${err.detail || 'bilinmeyen hata'}`;
+          errBox.style.display = 'block';
+          return;
+        }
+        renderDeepAuditData(await resp.json());
+        resCard.style.display = 'block';
+      } catch (e) {
+        errBox.textContent = `❌ Denetim isteği gönderilemedi (ağ hatası): ${e}`;
+        errBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>360° DERİN DENETİMİ ÇALIŞTIR</span>';
+      }
+    }
+
+    function setProbe(id, text, color) {
+      const el = document.getElementById(id);
+      el.innerText = text;
+      el.style.color = color || 'var(--text-dim)';
+    }
+
+    function renderDeepAuditData(data) {
+      const base = data.base_audit || {};
+      const cats = base.categories || {};
+
+      // Composite gauge — real value only, never a fabricated default.
+      const rawScore = (data.composite_deep_score != null) ? data.composite_deep_score
+                     : (base.overall_score != null ? base.overall_score : null);
+      const scoreEl = document.getElementById('da-score-val');
+      const circle = document.getElementById('da-gauge-circle');
+      if (rawScore != null) {
+        const score = Math.round(rawScore);
+        scoreEl.innerText = String(score);
+        circle.style.strokeDashoffset = 238 - (238 * Math.min(100, Math.max(0, score)) / 100);
+        circle.style.stroke = score > 70 ? 'var(--emerald)' : (score > 40 ? 'var(--amber)' : 'var(--rose)');
+      } else {
+        scoreEl.innerText = '—';
+        circle.style.strokeDashoffset = 238;
+        circle.style.stroke = 'rgba(255,255,255,0.15)';
+      }
+
+      document.getElementById('da-res-domain').innerText = base.domain || '—';
+      document.getElementById('da-tier-val').innerText = (data.deep_tier || '—').replace(/_/g, ' ');
+      document.getElementById('da-tier-val').style.color =
+        data.deep_tier === 'ENTERPRISE_READY' ? 'var(--emerald)'
+        : data.deep_tier === 'STABLE' ? 'var(--cyan)'
+        : (data.deep_tier === 'RISK_EXPOSED' || data.deep_tier === 'CRITICAL_BLOCKED' || data.deep_tier === 'CRITICAL_LOW_SCORE') ? 'var(--rose)' : 'var(--text-muted)';
+
+      // Pillars — bind to the REAL nested category models (score/max), show — if absent.
+      setTilePillar('crawlers', cats.robots && cats.robots.score, 18);
+      setTilePillar('llms', cats.llms_txt && cats.llms_txt.score, 18);
+      setTilePillar('schema', cats.schema_jsonld && cats.schema_jsonld.score, 16);
+      setTilePillar('headers', cats.meta_architecture && cats.meta_architecture.score, 14);
+
+      // WAF probe (real field: waf_probe)
+      const wp = data.waf_probe;
+      if (wp) {
+        if (wp.overall_risk === 'UNVERIFIED') {
+          setProbe('dp-probe-waf', `HÜKÜM VERİLEMEDİ (${wp.unreachable_bots_count || 0}/${wp.total_probed || '?'} ağ hatası)`, 'var(--amber)');
+        } else if (wp.is_silently_blocked) {
+          setProbe('dp-probe-waf', `BLOCKED (${wp.blocked_bots_count}/${wp.total_probed || (wp.blocked_bots_count + wp.accessible_bots_count)})${wp.detected_waf_provider ? ' · ' + wp.detected_waf_provider : ''}`, 'var(--rose)');
+        } else {
+          setProbe('dp-probe-waf', `TEMİZ (${wp.accessible_bots_count}/${wp.total_probed || '?'} bot erişebiliyor)`, 'var(--emerald)');
+        }
+      } else {
+        setProbe('dp-probe-waf', 'PROBE EDİLMEDİ');
+      }
+
+      // Adversarial (real field: adversarial)
+      const adv = data.adversarial;
+      if (adv) {
+        setProbe('dp-probe-adv', adv.is_clean ? 'TEMİZ (risk 0)' : `${esc(adv.threat_level)} (risk ${Number(adv.risk_score || 0).toFixed(0)})`, adv.is_clean ? 'var(--cyan)' : 'var(--rose)');
+      } else {
+        setProbe('dp-probe-adv', 'TARANMADI');
+      }
+
+      // Entity grounding (real fields: has_wikidata / wikidata_qid / wikidata_probe_status)
+      const gr = data.entity_grounding;
+      if (gr) {
+        if (gr.wikidata_probe_status === 'unreachable') {
+          setProbe('dp-probe-wiki', 'SORGULANAMADI (yeniden deneyin)', 'var(--amber)');
+        } else if (gr.has_wikidata && gr.wikidata_qid) {
+          // P856 confidence ladder (never a blanket "DOĞRULANDI" — a rejected or
+          // unverified QID must not read as confirmed to the user).
+          const conf = gr.qid_confidence || 'unknown';
+          if (conf === 'rejected') {
+            setProbe('dp-probe-wiki', `${esc(gr.wikidata_qid)} REDDEDİLDİ (resmî site çelişkisi)`, 'var(--rose)');
+          } else if (conf === 'verified') {
+            setProbe('dp-probe-wiki', `${esc(gr.wikidata_qid)} TEYİTLİ · P856 ✓`, 'var(--emerald)');
+          } else if (conf === 'exact_name_no_conflict') {
+            setProbe('dp-probe-wiki', `${esc(gr.wikidata_qid)} birebir etiket · P856 kaydı yok`, 'var(--sky)');
+          } else if (conf === 'unverified') {
+            setProbe('dp-probe-wiki', `${esc(gr.wikidata_qid)} · resmî site teyidi eksik`, 'var(--amber)');
+          } else {
+            setProbe('dp-probe-wiki', `${esc(gr.wikidata_qid)} BULUNDU (teyitsiz kayıt)`, 'var(--sky)');
+          }
+        } else {
+          setProbe('dp-probe-wiki', 'KAYIT YOK (canlı sorgu)', 'var(--amber)');
+        }
+      } else {
+        setProbe('dp-probe-wiki', 'TARANMADI');
+      }
+
+      // Citation Share (SoV) — only real prior runs; null renders "ÖLÇÜLMEDİ", never a number.
+      setProbe('dp-probe-cite', 'YÜKLENİYOR…');
+      (async () => {
+        const dom = base.domain;
+        if (!dom) { setProbe('dp-probe-cite', '—'); return; }
+        try {
+          const r = await fetch(`/api/citations/latest?domain=${encodeURIComponent(dom)}`);
+          const c = await r.json();
+          if (!c || !c.run_id) { setProbe('dp-probe-cite', 'ÖLÇÜLMEDİ'); return; }
+          const live = (c.live_items_count === 0)
+            ? `0/${c.total_runs} canlı (simülasyon modu — API anahtarı yok)`
+            : `${c.live_items_count}/${c.total_runs} canlı`;
+          const color = (c.live_items_count === 0) ? 'var(--amber)' : 'var(--emerald)';
+          setProbe('dp-probe-cite', `%${Number(c.citation_rate_percentage || 0).toFixed(0)} · ${c.brand_citations_found}/${c.total_runs} · ${live}`, color);
+        } catch (e) {
+          setProbe('dp-probe-cite', 'VERİ ALINAMADI');
+        }
+      })();
+
+      // Lost revenue — explicitly a model estimate; blank when absent, never fabricated.
+      const loss = base.lost_revenue_estimate_monthly_try;
+      document.getElementById('dp-probe-loss').innerText = (loss != null)
+        ? '₺' + Number(loss).toLocaleString('tr-TR') + '/ay*' : '—';
+
+      const link = document.getElementById('da-full-report-btn');
+      if (base.audit_id) { link.href = `/reports/${encodeURIComponent(base.audit_id)}`; link.style.display = 'inline-flex'; }
+      else { link.style.display = 'none'; }
+    }
+
+    function setTilePillar(id, val, max) {
+      const label = document.getElementById('dp-' + id);
+      const bar = document.getElementById('dp-bar-' + id);
+      if (val == null || typeof val !== 'number') {
+        label.innerText = '—';
+        bar.style.width = '0%';
+        return;
+      }
+      const pct = Math.min(100, Math.round((val / max) * 100));
+      label.innerText = `${val}/${max}`;
+      bar.style.width = pct + '%';
+    }
+
+    async function analyzeSentiment() {
+      const brand = document.getElementById('sent-brand').value;
+      const text = document.getElementById('sent-raw-text').value;
+      const sector = document.getElementById('sent-sector').value;
+      const box = document.getElementById('sent-results-box');
+      const errEl = document.getElementById('sent-error');
+      errEl.style.display = 'none';
+
+      try {
+        const resp = await fetch('/api/sentiment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ brand_name: brand, raw_text: text, sector: sector })
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          errEl.textContent = `❌ Analiz başarısız (HTTP ${resp.status}): ${err.detail || 'bilinmeyen hata'}`;
+          errEl.style.display = 'block';
+          box.style.display = 'none';
+          return;
+        }
+        const data = await resp.json();
+        const score = (typeof data.sentiment_score === 'number') ? data.sentiment_score : null;
+        document.getElementById('sent-score-val').innerText =
+          score != null ? (score > 0 ? '+' : '') + score.toFixed(2) + ` (${esc(data.polarity || '?')})` : '—';
+        document.getElementById('sent-safety-val').innerText = data.is_brand_safe ? 'GÜVENLİ (SAFE)' : 'RİSKLİ (UNSAFE)';
+        document.getElementById('sent-safety-val').style.color = data.is_brand_safe ? 'var(--emerald)' : 'var(--rose)';
+        const flags = (data.detected_flags || []);
+        document.getElementById('sent-clarity-val').innerText = flags.length ? flags.length + ' bayrak' : '0 bayrak';
+        document.getElementById('sent-clarity-val').style.color = flags.length ? 'var(--rose)' : 'var(--emerald)';
+
+        const quotesBox = document.getElementById('sent-quotes-container');
+        const lines = [];
+        if (data.context_snippet) lines.push(`❝ ${esc(data.context_snippet)} ❞`);
+        if (data.counter_citation_strategy) lines.push(`STRATEJİ: ${esc(data.counter_citation_strategy)}`);
+        quotesBox.textContent = '';
+        lines.forEach(l => { const d = document.createElement('div'); d.textContent = l; quotesBox.appendChild(d); });
+        if (!lines.length) quotesBox.textContent = 'Bağlam alıntısı / karşı-strateji üretilmedi.';
+        box.style.display = 'block';
+      } catch (e) {
+        errEl.textContent = `❌ Analiz isteği gönderilemedi (ağ hatası): ${e}`;
+        errEl.style.display = 'block';
+        box.style.display = 'none';
+      }
+    }
+
+    async function loadDashboardMetrics() {
+      try {
+        const [fRes, tRes, telRes] = await Promise.all([
+          fetch('/api/fiscal-report'),
+          fetch('/api/territory-locks'),
+          fetch('/api/telemetry')
+        ]);
+
+        // System status pill (replaces the old static claim)
+        const pill = document.getElementById('sys-status-pill');
+        try {
+          const h = await fetch('/health');
+          const hj = h.ok ? await h.json() : {};
+          pill.innerHTML = hj.status === 'ok'
+            ? `<span class="status-pulse"></span><span>SİSTEM ÇEVRİMİÇİ · API v${esc(hj.version || '?')}</span>`
+            : `<span class="status-pulse" style="background:var(--rose);box-shadow:0 0 10px var(--rose)"></span><span>SİSTEM DURUMU: ${h.status}</span>`;
+        } catch (e) {
+          pill.innerHTML = '<span class="status-pulse" style="background:var(--rose);box-shadow:0 0 10px var(--rose)"></span><span>API\'E BAĞLANILAMIYOR</span>';
+        }
+
+        if (fRes.ok) {
+          const fData = await fRes.json();
+          document.getElementById('top-foreign-rev').innerText = '₺' + Number(fData.total_foreign_revenue_try || 0).toLocaleString('tr-TR');
+          document.getElementById('top-exempt-base').innerText = '₺' + Number(fData.total_exempt_income_kvk10g_try || 0).toLocaleString('tr-TR');
+          document.getElementById('fisc-tot-rev').innerText = '₺' + Number(fData.total_foreign_revenue_try || 0).toLocaleString('tr-TR');
+          document.getElementById('fisc-exempt-base').innerText = '₺' + Number(fData.total_exempt_income_kvk10g_try || 0).toLocaleString('tr-TR');
+          document.getElementById('fisc-shield-pct').innerText = '%' + (fData.effective_tax_shield_pct || 0);
+
+          const fBody = document.getElementById('fiscal-table-body');
+          const recs = fData.records || [];
+          if (recs.length > 0) {
+            fBody.innerHTML = recs.map(r => `
+              <tr>
+                <td style="font-family:'JetBrains Mono';">${esc(r.invoice_id)}</td>
+                <td><strong>${esc(r.client_brand)}</strong></td>
+                <td>${esc(r.client_country)}</td>
+                <td>${esc(r.currency)} ${Number(r.amount_foreign).toLocaleString('tr-TR')} <span style="color:var(--text-dim);font-size:11px;">@${r.exchange_rate_tcmb} (${esc(r.fx_source)})</span></td>
+                <td>₺${Number(r.amount_try).toLocaleString('tr-TR')}</td>
+                <td style="color:var(--emerald);">₺${Number(r.exempt_income_try).toLocaleString('tr-TR')}</td>
+                <td>${Number(r.vat_rate_pct) === 0 ? 'KDV İstisnası' : '%' + r.vat_rate_pct + ' KDV'}</td>
+              </tr>
+            `).join('');
+          } else {
+            fBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-dim);">Henüz faturalandırılmış ihracat kaydı bulunmuyor.</td></tr>';
+          }
+        }
+
+        if (tRes.ok) {
+          const tData = await tRes.json();
+          document.getElementById('top-territory-count').innerText = tData.length;
+          const tBody = document.getElementById('territory-table-body');
+          if (tData.length > 0) {
+            tBody.innerHTML = tData.map(l => `
+              <tr>
+                <td><strong>${esc(l.brand_name)}</strong></td>
+                <td><span class="card-badge">${esc((l.niche || '').toUpperCase())}</span></td>
+                <td>${esc((l.city || '').toUpperCase())}, ${esc(l.country)}</td>
+                <td><span style="color:var(--emerald); font-weight:700;">● ${esc(l.tier || 'EXCLUSIVE')}</span></td>
+                <td>${esc(String(l.created_at || '').substring(0, 10))} <span style="color:var(--text-dim);font-size:11px;">(sözleşme süresince)</span></td>
+              </tr>
+            `).join('');
+          } else {
+            tBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">Henüz kilitlenmiş bölge yok (İlk müşteri bekleniyor).</td></tr>';
+          }
+        }
+
+        if (telRes.ok) {
+          const telData = await telRes.json();
+          const live = telData.is_live_ready && (telData.configured_providers || []).length;
+          document.getElementById('top-llm-cost').innerText = '$' + Number(telData.total_estimated_cost_usd || 0).toFixed(4);
+          document.getElementById('top-llm-mode').innerText = live
+            ? `${telData.configured_providers.length} sağlayıcı CANLI`
+            : 'CANLI ANAHTAR YOK — SİMÜLASYON MODU';
+          document.getElementById('top-llm-mode').style.color = live ? 'var(--emerald)' : 'var(--amber)';
+          document.getElementById('tel-providers').innerText = (telData.configured_providers || []).join(', ') || 'YOK (simülasyon)';
+          document.getElementById('tel-providers-sub').innerText = live ? 'Canlı API anahtarları doğrulandı' : 'Canlı anahtar yok — ölçümler SİMÜLASYONDUR';
+          document.getElementById('tel-calls').innerText = `${telData.total_live_calls || 0} / ${telData.total_fallbacks || 0}`;
+          document.getElementById('tel-cost').innerText = '$' + Number(telData.total_estimated_cost_usd || 0).toFixed(4);
+
+          // Provider health matrix — built from real telemetry only.
+          const rowsBox = document.getElementById('tel-provider-rows');
+          const provs = Object.values(telData.providers || {});
+          if (provs.length) {
+            rowsBox.innerHTML = provs.map(p => {
+              const st = p.has_api_key ? (p.is_live_enabled ? 'ONLINE' : 'ANAHTAR VAR / DEVRE DIŞI') : 'ANAHTAR YOK — SİMÜLASYON';
+              const col = p.has_api_key && p.is_live_enabled ? 'var(--emerald)' : 'var(--amber)';
+              return `<div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:12px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="color:#fff;">${esc(p.provider)}</strong>
+                  <div style="font-size:12px; color:var(--text-dim);">çağrı ${p.total_calls || 0} · canlı ${p.successful_calls || 0} · fallback ${p.fallback_calls || 0} · ~${Math.round(p.avg_latency_ms || 0)}ms · $${Number(p.estimated_cost_usd || 0).toFixed(4)}</div>
+                </div>
+                <div style="font-family:'Space Grotesk', monospace; color:${col}; font-weight:700;">${esc(st)}</div>
+              </div>`;
+            }).join('');
+          } else {
+            rowsBox.innerHTML = '<div style="font-size:13px; color:var(--text-dim); padding:14px;">Bu süreçte henüz sağlayıcı çağrısı yapılmadı. Anahtar tanımlıysa ilk canlı çağrıda matris dolacaktır.</div>';
+          }
+        }
+      } catch (e) {
+        console.warn('Dashboard metric sync warning', e);
+      }
+    }
+
+
+    async function decideQueue(id, action) {
+      try {
+        const resp = await fetch(`/api/queue/${id}/decision`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({action: action, note: 'dashboard tek-tık'})
+        });
+        if (resp.ok) { loadQueue(); }
+        else { alert('Karar işlenmedi: ' + (await resp.json()).detail); }
+      } catch (e) { alert('Kuyruk API erişilemez — ÖLÇÜLEMEDİ.'); }
+    }
+
+    async function loadQueue() {
+      const box = document.getElementById('queue-rows');
+      const badge = document.getElementById('queue-count-badge');
+      try {
+        const data = await (await fetch('/api/queue')).json();
+        const items = data.items || [];
+        badge.textContent = items.length + ' Bekleyen';
+        if (!items.length) {
+          box.innerHTML = '<p style="color:var(--text-muted);">Kuyruk boş — iş uydurulmaz.</p>';
+          return;
+        }
+        box.innerHTML = items.map(i => `<div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; padding:8px 0; border-bottom:1px solid rgba(148,163,184,.12);">
+          <span style="color:var(--cyan,#22d3ee); font-weight:600;">${i.kind}</span>
+          <strong>${i.ref_id}</strong><span style="flex:1;color:var(--text-muted);">${i.summary}</span>
+          <button class="btn-plan" style="padding:4px 12px;font-size:12px;" onclick="decideQueue(${i.id},'approve')">Onayla</button>
+          <button class="btn-plan" style="padding:4px 12px;font-size:12px;" onclick="decideQueue(${i.id},'reject')">Reddet</button>
+        </div>`).join('');
+      } catch (err) {
+        box.innerHTML = '<p style="color:var(--amber);">Kuyruk API erişilemez — ÖLÇÜLEMEDİ (sayı uydurulmaz).</p>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Her yükleyici izole: biri hata verirse diğerlerini öldürmesin
+      // (panel 'yükleniyor…' sahte döngüsü bu yüzden kalıcıydı).
+      const safe = (name, fn) => { try { fn(); } catch (e) { console.error(name + ' başlatılamadı:', e); } };
+      safe('metrics', loadDashboardMetrics);
+      safe('swarm', loadSwarmCandidates);
+      safe('monitors', loadMonitors);
+      safe('queue', loadQueue);
+    });
+  </script>
+</body>
+</html>

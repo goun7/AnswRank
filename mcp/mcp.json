@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "name": "answrank",
+  "display_name": "AnswRank — AEO/GEO Audit & AI-Visibility Fixes",
+  "description": "Audits a website for answer-engine visibility (AEO/GEO) across 8 categories with a 0-100 score, tests brand citation rate across 5 AI models, and generates ready-to-copy robots.txt, llms.txt and JSON-LD. Audit and fix generation need no API keys; citation testing requires one or more LLM provider keys.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/goun7/AnswRank",
+  "repository": "https://github.com/goun7/AnswRank",
+  "categories": ["seo-marketing", "developer-tools", "analytics"],
+  "transport": "stdio",
+  "install": {
+    "command": "python",
+    "args": ["-m", "answrank.mcp.server"],
+    "env": {
+      "ANSWRANK_DB_PATH": {
+        "description": "SQLite path for audit/citation history. Defaults to the package data dir.",
+        "required": false
+      },
+      "PERPLEXITY_API_KEY": {
+        "description": "LLM provider key for citation testing (only needed by answrank_citations).",
+        "required": false
+      },
+      "OPENAI_API_KEY": {
+        "description": "LLM provider key for citation testing (only needed by answrank_citations).",
+        "required": false
+      },
+      "GEMINI_API_KEY": {
+        "description": "LLM provider key for citation testing (only needed by answrank_citations).",
+        "required": false
+      },
+      "ANTHROPIC_API_KEY": {
+        "description": "LLM provider key for citation testing (only needed by answrank_citations).",
+        "required": false
+      },
+      "MISTRAL_API_KEY": {
+        "description": "LLM provider key for citation testing (only needed by answrank_citations).",
+        "required": false
+      },
+      "ANSWRANK_GROUNDING": {
+        "description": "Set to 0 to disable live grounding fetches during audits (offline-ish mode).",
+        "required": false
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "answrank_audit",
+      "description": "Audit a website for AI answer-engine visibility (AEO/GEO) across 8 categories; returns a 0-100 score, crawl warnings, lost-revenue estimate and recommendations."
+    },
+    {
+      "name": "answrank_citations",
+      "description": "Run sector questions across 5 AI models to measure a brand's citation rate. Requires at least one LLM provider API key."
+    },
+    {
+      "name": "answrank_generate_fixes",
+      "description": "Generate ready-to-copy robots.txt, llms.txt and JSON-LD schema for a domain. No API key required."
+    }
+  ],
+  "privacy": {
+    "keys": "LLM provider keys are read from the environment and used only for citation testing; they are never logged or persisted. Audit and fix-generation tools run without any key.",
+    "network": "answrank_audit fetches the target URL; answrank_citations calls the configured LLM providers. answrank_generate_fixes makes no network calls."
+  }
+}

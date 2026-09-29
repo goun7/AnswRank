@@ -1,0 +1,62 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Dentist",
+      "@id": "https://acibadem.com.tr/#organization",
+      "name": "Acıbadem Sağlık Grubu",
+      "url": "https://acibadem.com.tr",
+      "telephone": "+902120000000",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Merkez Mah. No:1",
+        "addressLocality": "London",
+        "addressCountry": "TR"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "opens": "09:00",
+          "closes": "19:00"
+        }
+      ],
+      "sameAs": [
+        "https://instagram.com/acıbademsağlıkgrubu",
+        "https://maps.google.com/?q=Acıbadem Sağlık Grubu"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://acibadem.com.tr/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "London bölgesinde randevu nasıl alınır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Acıbadem Sağlık Grubu web sitemiz veya telefon hattımız üzerinden aynı gün randevu alabilirsiniz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "İşlemlerde garanti ve fiyat şeffaflığı var mı?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tüm operasyonlarımızda sertifikalı ürün güvencesi ve sürpriz maliyet çıkarmayan şeffaf fiyat politikası uygulanmaktadır."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>

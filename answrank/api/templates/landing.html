@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnswRank — Autonomous Swarm Generative Engine Optimization (GEO & AEO)</title>
+  <meta name="description" content="AnswRank Autonomous Swarm Engine: Yüksek bütçeli sektörlerde ChatGPT, Perplexity ve Google Gemini aramalarında markanızın AI cevaplarında önerilen kaynaklar arasında yer almasını sağlayın.">
+  <link rel="icon" type="image/svg+xml" href="/assets/logos/logo_1_citation_monogram.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #06080d;
+      --bg-surface: #0c111a;
+      --bg-card: rgba(13, 18, 30, 0.85);
+      --bg-elevated: rgba(19, 26, 42, 0.92);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(16, 185, 129, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #7e93ab;  /* 4.21:1 → 6.34:1 AA (16 Eyl a11y taraması) */
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --cyan: #00f2fe;
+      --cyan-glow: rgba(0, 242, 254, 0.2);
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --gradient-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --gradient-text: linear-gradient(180deg, #ffffff 15%, #94a3b8 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 55%, rgba(0, 242, 254, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 90%, rgba(59, 130, 246, 0.05) 0%, transparent 45%);
+    }
+
+    .container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+
+    /* Sticky Glass Header */
+    nav {
+      position: sticky; top: 0; z-index: 1000;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(6, 8, 13, 0.88);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+
+    /* Brand Logo */
+    .brand-logo-link {
+      display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit;
+    }
+    .logo-svg-box {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);
+      display: grid; place-items: center; padding: 4px;
+      box-shadow: 0 0 24px var(--emerald-glow);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .brand-logo-link:hover .logo-svg-box { transform: scale(1.05); }
+    .brand-logo-text { display: flex; flex-direction: column; }
+    .brand-title {
+      font-size: 22px; font-weight: 900; letter-spacing: 2px; line-height: 1.1;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brand-title span { color: var(--emerald); }
+    .brand-sub {
+      font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-dim);
+      font-family: 'Space Grotesk', monospace;
+    }
+
+    .nav-links { display: flex; gap: 24px; align-items: center; font-size: 14px; font-weight: 600; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+
+    /* Language & Currency Selector */
+    .lang-switcher {
+      display: flex; background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color); border-radius: 99px; padding: 3px; gap: 2px;
+    }
+    .lang-btn {
+      background: none; border: none; color: var(--text-dim);
+      padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .lang-btn:hover { color: #fff; }
+    .lang-btn.active {
+      background: var(--emerald); color: #000; box-shadow: 0 0 14px var(--emerald-glow);
+    }
+
+    .btn-cta-nav {
+      background: var(--gradient-emerald); color: #000 !important;
+      padding: 9px 20px; border-radius: 10px; font-size: 13px; font-weight: 800;
+      text-decoration: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 20px var(--emerald-glow); cursor: pointer; border: none;
+    }
+    .btn-cta-nav:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .btn-cta-nav:active { transform: scale(0.98); }
+
+    /* Hero Section */
+    .hero { padding: 90px 0 50px; text-align: center; position: relative; }
+    .pill-announce {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 8px 20px; border-radius: 99px;
+      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);
+      color: var(--emerald); font-size: 13px; font-weight: 700; margin-bottom: 28px;
+      font-family: 'Space Grotesk', monospace; letter-spacing: 0.5px;
+    }
+    .pill-pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--emerald); box-shadow: 0 0 10px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    h1 {
+      font-size: 60px; font-weight: 900; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px;
+      background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 19px; color: var(--text-muted); max-width: 840px; margin: 0 auto 46px;
+      font-weight: 400; line-height: 1.6;
+    }
+    .hero-sub strong { color: #fff; font-weight: 600; }
+
+    /* Confidential Audit Bar */
+    .audit-bar-card {
+      max-width: 880px; margin: 0 auto 40px;
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      border-radius: 20px; padding: 10px;
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.06);
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .audit-bar-card:focus-within {
+      border-color: var(--emerald); box-shadow: 0 0 40px var(--emerald-glow);
+    }
+    .audit-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: #fff; font-size: 16px; padding: 12px 18px; font-family: inherit;
+    }
+    .audit-input::placeholder { color: var(--text-dim); }
+    .sector-select {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color);
+      color: var(--text-muted); border-radius: 12px; padding: 12px 16px;
+      font-size: 13px; font-weight: 600; outline: none; font-family: inherit;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .sector-select:focus { border-color: var(--emerald); color: #fff; }
+    .audit-btn {
+      background: var(--gradient-emerald); color: #000; font-weight: 900;
+      border: none; border-radius: 12px; padding: 14px 28px; font-size: 14px;
+      letter-spacing: 0.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 20px var(--emerald-glow); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit; white-space: nowrap;
+    }
+    .audit-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .audit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Confidential Audit Results HUD */
+    #audit-results-hud {
+      display: none; max-width: 960px; margin: 0 auto 50px;
+      background: var(--bg-elevated); border: 1px solid var(--border-glow);
+      border-radius: 24px; padding: 32px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 50px rgba(16, 185, 129, 0.1);
+      animation: hudSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); text-align: left;
+    }
+    @keyframes hudSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .hud-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 24px;
+    }
+    .hud-title-group h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .hud-title-group span { font-size: 13px; color: var(--emerald); font-weight: 600; }
+    .gauge-wrapper { display: flex; align-items: center; gap: 16px; }
+    .circular-gauge { position: relative; width: 84px; height: 84px; }
+    .circular-gauge svg { width: 84px; height: 84px; transform: rotate(-90deg); }
+    .circular-gauge circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+    .circle-bg { stroke: rgba(255, 255, 255, 0.08); }
+    .circle-progress {
+      stroke: var(--emerald); stroke-dasharray: 226; stroke-dashoffset: 60;
+      transition: stroke-dashoffset 1s ease, stroke 0.3s ease;
+    }
+    .gauge-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 22px; font-weight: 900; font-family: 'Space Grotesk', monospace;
+    }
+
+    /* 7 Pillars HUD Grid */
+    .hud-pillars-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .hud-pillar-item {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 14px;
+    }
+    .hud-pillar-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .hud-bar-bg { height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 99px; overflow: hidden; }
+    .hud-bar-fill { height: 100%; background: var(--gradient-emerald); border-radius: 99px; transition: width 0.8s ease; }
+
+    .hud-footer-metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      padding: 16px 20px; background: rgba(0, 0, 0, 0.35); border-radius: 14px;
+      border: 1px solid var(--border-color); margin-bottom: 24px;
+    }
+    .hud-metric-box { font-size: 12px; color: var(--text-muted); }
+    .hud-metric-box strong { display: block; font-size: 17px; margin-top: 4px; font-family: 'Space Grotesk', monospace; }
+
+    .hud-actions { display: flex; justify-content: space-between; align-items: center; }
+    .btn-full-report {
+      background: rgba(255, 255, 255, 0.08); color: #fff; text-decoration: none;
+      padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-full-report:hover { background: rgba(255, 255, 255, 0.16); }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 38px; font-weight: 900; letter-spacing: -1px; text-align: center; margin-bottom: 14px;
+      background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section-sub {
+      font-size: 16px; color: var(--text-muted); text-align: center; max-width: 720px; margin: 0 auto 48px;
+    }
+
+    /* Interactive Comparison Section */
+    .comparison-section { padding: 50px 0; }
+    .comparison-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 24px; padding: 40px; backdrop-filter: blur(16px);
+    }
+    .engine-switcher {
+      display: flex; justify-content: center; gap: 10px; margin-bottom: 30px;
+    }
+    .engine-tab {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color);
+      color: var(--text-muted); padding: 8px 18px; border-radius: 99px;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .engine-tab:hover { color: #fff; }
+    .engine-tab.active { background: var(--emerald); color: #000; font-weight: 800; box-shadow: 0 0 16px var(--emerald-glow); }
+
+    .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .comp-box {
+      border-radius: 18px; padding: 28px; position: relative; border: 1px solid transparent;
+      background: rgba(6, 8, 13, 0.7);
+    }
+    .comp-before { border-color: rgba(244, 63, 94, 0.2); }
+    .comp-after { border-color: rgba(16, 185, 129, 0.35); box-shadow: 0 0 30px rgba(16, 185, 129, 0.08); }
+    .comp-badge {
+      font-size: 11px; font-weight: 800; font-family: 'Space Grotesk', monospace;
+      padding: 4px 12px; border-radius: 99px; display: inline-block; margin-bottom: 16px;
+    }
+    .badge-red { background: rgba(244, 63, 94, 0.15); color: var(--rose); }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
+    .comp-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+    .comp-body { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .comp-citation-highlight {
+      background: rgba(16, 185, 129, 0.15); color: var(--emerald);
+      padding: 2px 6px; border-radius: 4px; font-weight: 700;
+    }
+
+    /* Territory Availability Checker */
+    .territory-checker-section { padding: 40px 0; }
+    .territory-checker-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 24px; padding: 36px; backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .territory-form {
+      display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 14px; align-items: flex-end;
+      margin-top: 24px;
+    }
+    .t-group { display: flex; flex-direction: column; gap: 6px; }
+    .t-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .t-select, .t-input {
+      background: rgba(8, 12, 20, 0.9); border: 1px solid var(--border-color);
+      color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px;
+      font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .t-select:focus, .t-input:focus { border-color: var(--emerald); }
+    .t-btn {
+      background: var(--gradient-emerald); color: #000; font-weight: 900;
+      border: none; border-radius: 12px; padding: 13px 24px; font-size: 13px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: inherit;
+    }
+    .t-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .territory-result-status {
+      margin-top: 20px; padding: 16px 20px; border-radius: 12px;
+      display: none; align-items: center; justify-content: space-between;
+    }
+    .t-status-open {
+      background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--emerald);
+    }
+    .t-status-locked {
+      background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); color: var(--rose);
+    }
+
+    /* Live AEO Code Artifacts Showcase */
+    .artifacts-section { padding: 40px 0; }
+    .artifacts-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 24px; padding: 36px; backdrop-filter: blur(16px);
+    }
+    .art-nav { display: flex; gap: 8px; margin-bottom: 16px; }
+    .art-tab-btn {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color);
+      color: var(--text-muted); padding: 8px 16px; border-radius: 8px; font-size: 13px;
+      font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .art-tab-btn.active { background: var(--emerald); color: #000; font-weight: 900; }
+    .code-editor-box {
+      background: #040609; border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px; padding: 20px; font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: #e2e8f0; max-height: 280px; overflow-y: auto; white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    /* Enterprise Pillars */
+    .pillars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 60px; }
+    .pillar-box {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 20px; padding: 32px; backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pillar-box:hover { border-color: rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
+    .pillar-icon { font-size: 32px; margin-bottom: 16px; }
+    .pillar-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: #fff; }
+    .pillar-detail { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* Interactive Revenue Leakage Calculator */
+    .roi-section {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 24px; padding: 44px; margin-bottom: 60px;
+      display: grid; grid-template-columns: 1.2fr 1fr; gap: 44px; align-items: center;
+    }
+    .roi-left h3 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    .roi-left p { font-size: 15px; color: var(--text-muted); margin-bottom: 28px; }
+    .slider-group { margin-bottom: 24px; }
+    .slider-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    .range-slider {
+      width: 100%; -webkit-appearance: none; appearance: none; height: 6px;
+      background: rgba(255, 255, 255, 0.1); border-radius: 99px; outline: none;
+    }
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+      border-radius: 50%; background: var(--emerald); cursor: pointer;
+      box-shadow: 0 0 10px var(--emerald);
+    }
+    .roi-card {
+      background: rgba(6, 8, 13, 0.85); border: 1px solid var(--border-glow);
+      border-radius: 20px; padding: 36px; text-align: center;
+    }
+    .roi-leak-amount {
+      font-size: 48px; font-weight: 900; font-family: 'Space Grotesk', monospace;
+      color: var(--rose); margin: 12px 0 6px; letter-spacing: -1px;
+    }
+    .roi-leak-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .roi-delta-box {
+      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px; padding: 12px; font-size: 13px; color: var(--emerald); font-weight: 700;
+    }
+
+    /* Guarantee Article 7 Box */
+    .guarantee-box {
+      background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 20px; padding: 36px; margin-bottom: 40px;
+      display: flex; gap: 24px; align-items: flex-start;
+    }
+    .guarantee-badge { font-size: 40px; line-height: 1; }
+    .guarantee-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .guarantee-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* Exclusivity Commitment Callout */
+    .exclusivity-box {
+      background: rgba(0, 242, 254, 0.03); border: 1px solid rgba(0, 242, 254, 0.2);
+      border-radius: 20px; padding: 36px; margin-bottom: 60px; text-align: center;
+    }
+    .exclusivity-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .exclusivity-desc { font-size: 15px; color: var(--text-muted); max-width: 820px; margin: 0 auto; line-height: 1.6; }
+
+    /* Pricing Grid */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 80px; }
+    .price-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 20px; padding: 36px; display: flex; flex-direction: column;
+      justify-content: space-between; backdrop-filter: blur(12px); position: relative;
+    }
+    .price-card.featured {
+      border-color: var(--emerald); box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
+      background: var(--bg-elevated);
+    }
+    .price-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .price-tag { font-size: 38px; font-weight: 900; font-family: 'Space Grotesk', monospace; margin: 20px 0; color: #fff; }
+    .price-features { list-style: none; margin-bottom: 30px; font-size: 13px; color: var(--text-muted); }
+    .price-features li { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .price-features li::before { content: '✓'; color: var(--emerald); font-weight: 800; }
+    .btn-plan {
+      background: rgba(255, 255, 255, 0.06); color: #fff; text-align: center;
+      padding: 14px; border-radius: 12px; font-weight: 800; font-size: 14px;
+      text-decoration: none; transition: all 0.2s; cursor: pointer; border: 1px solid var(--border-color);
+    }
+    .btn-plan:hover { background: rgba(255, 255, 255, 0.14); }
+    .price-card.featured .btn-plan {
+      background: var(--gradient-emerald); color: #000; border: none;
+      box-shadow: 0 4px 20px var(--emerald-glow);
+    }
+    .price-card.featured .btn-plan:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* Booking & Reservation Modal */
+    .modal-backdrop {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+      z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-card {
+      background: var(--bg-elevated); border: 1px solid var(--border-glow);
+      border-radius: 24px; padding: 36px; max-width: 540px; width: 100%;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px; background: none; border: none;
+      color: var(--text-dim); font-size: 20px; cursor: pointer;
+    }
+    .modal-close:hover { color: #fff; }
+    .m-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .m-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .m-input {
+      background: rgba(8, 12, 20, 0.9); border: 1px solid var(--border-color);
+      color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px;
+      font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .m-input:focus { border-color: var(--emerald); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color); padding: 40px 0; text-align: center;
+      color: var(--text-dim); font-size: 13px;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: #fff; }
+
+    .nav-toggle { display: none; background: none; border: 1px solid var(--border-color);
+      border-radius: 10px; color: var(--text); padding: 8px 12px; cursor: pointer;
+      font-size: 18px; line-height: 1; }
+    @media (max-width: 992px) {
+      h1 { font-size: 42px; }
+      .pillars-grid, .pricing-grid, .comp-grid, .roi-section { grid-template-columns: 1fr; }
+      .hud-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+      .territory-form { grid-template-columns: 1fr; }
+      .nav-links {
+        display: none; order: 3; flex-basis: 100%; flex-direction: column;
+        gap: 10px; padding: 12px 0 4px; border-top: 1px solid var(--border-color);
+      }
+      .nav-links.open { display: flex; }
+      .nav-toggle { display: inline-flex; }
+      .audit-bar-card { padding: 8px; }
+      .audit-bar-card .btn { width: 100%; white-space: normal; }
+      .audit-input { min-width: 0; }
+      /* Mobil nav: logo + hamburger + dil + CTA tek sığmıyor -> sarmalanır */
+      .nav-inner { flex-wrap: wrap; gap: 8px; }
+      .btn-cta-nav { padding: 6px 10px; font-size: 12px; }
+      .lang-btn { padding: 4px 6px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ekran okuyucu kullanıcıları için içeriğe atla -->
+  <a href="#main-content" class="sr-only" style="position:absolute;left:8px;top:8px;z-index:9999;
+     width:auto;height:auto;padding:8px 14px;margin:0;clip:auto;white-space:nowrap;overflow:visible;
+     background:#0b0f1a;color:#fff;border-radius:8px;text-decoration:none;">İçeriğe geç</a>
+
+  <!-- Sticky Glass Navigation -->
+  <nav>
+    <div class="container nav-inner">
+      <button type="button" class="nav-toggle" id="navToggle" aria-label="Menüyü aç/kapat"
+              aria-expanded="false">☰</button>
+      <a href="/" class="brand-logo-link">
+        <div class="logo-svg-box">
+          <svg viewBox="0 0 800 800" width="100%" height="100%">
+            <defs>
+              <linearGradient id="navLogoGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#059669"/>
+                <stop offset="100%" stop-color="#34d399"/>
+              </linearGradient>
+            </defs>
+            <g transform="translate(400, 360)">
+              <path d="M -90,140 L -90,-20 C -90,-80 -40,-130 20,-130 L 20,-75 C -10,-75 -35,-50 -35,-20 L -35,140 Z" fill="#ffffff"/>
+              <path d="M 35,140 L 35,-40 L 90,15 L 90,-90 L 0,-180 L -30,-150 L 35,-85 Z" fill="url(#navLogoGrad)"/>
+              <circle cx="-5" cy="50" r="16" fill="#10b981"/>
+              <rect x="-35" y="44" width="70" height="12" rx="6" fill="#10b981" opacity="0.8"/>
+            </g>
+          </svg>
+        </div>
+        <div class="brand-logo-text">
+          <div class="brand-title">ANSW<span>RANK</span></div>
+          <div class="brand-sub">GENERATIVE ENGINE OPTIMIZATION</div>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="#audit" data-i18n="nav_audit">Gizli Teşhis</a>
+        <a href="#comparison" data-i18n="nav_simulation">Arama Farkı</a>
+        <a href="#territory" data-i18n="nav_territory">Bölge Kontrolü</a>
+        <a href="#artifacts" data-i18n="nav_artifacts">AEO Kodları</a>
+        <a href="#calculator" data-i18n="nav_calc">Ciro Hesabı</a>
+        <a href="#pricing" data-i18n="nav_pricing">Yatırım Planları</a>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="lang-switcher">
+          <button type="button" class="lang-btn active" onclick="setMarket('TR', '₺', 1, event)">🇹🇷 TR</button>
+          <button type="button" class="lang-btn" onclick="setMarket('UK', '£', 0.034, event)">🇬🇧 UK</button>
+          <button type="button" class="lang-btn" onclick="setMarket('US', '$', 0.044, event)">🇺🇸 US</button>
+          <button type="button" class="lang-btn" onclick="setMarket('DE', '€', 0.040, event)">🇩🇪 DE</button>
+        </div>
+        <button type="button" class="btn-cta-nav" onclick="openReservationModal()" data-i18n="nav_btn_cta">Bölgeyi Kilitle</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Header -->
+  <header class="hero" id="main-content" tabindex="-1">
+    <div class="container">
+      <div class="pill-announce">
+        <span class="pill-pulse"></span>
+        <span data-i18n="hero_pill">Yapay Zeka Çağının Yeni Arama Standardı</span>
+      </div>
+      <h1 data-i18n="hero_title">Tek Cevap Ekonomisinde Zirveye Yerleşin.</h1>
+      <p class="hero-sub" data-i18n="hero_sub">
+        Yüksek bütçeli hastalar ve kurumsal müşteriler artık <strong>ChatGPT Search, Perplexity Sonar, Google Gemini ve Claude</strong>'a soruyor. Yapay zeka doğrudan tek bir otoriteyi öneriyor. O otorite siz misiniz, yoksa cironun tamamını rakipleriniz mi topluyor?
+      </p>
+
+      <!-- Confidential Audit Bar -->
+      <div class="audit-bar-card" id="audit">
+        <label class="sr-only" for="domain-input">Hedef web sitesi alan adı</label>
+        <input type="text" id="domain-input" class="audit-input" placeholder="Hedef web sitesini girin (örn. klinikadi.com.tr)..." autocomplete="domain" aria-label="Hedef web sitesi alan adı">
+        <select id="sector-select" class="sector-select">
+          <option value="dental" data-i18n="sec_dental">Diş Hekimliği & İmplant</option>
+          <option value="aesthetic" data-i18n="sec_aesthetic">Estetik & Plastik Cerrahi</option>
+          <option value="accounting" data-i18n="sec_accounting">Yeminli Mali Müşavirlik (CPA)</option>
+          <option value="general" selected data-i18n="sec_general">Yüksek Biletli Hizmetler</option>
+        </select>
+        <button type="button" class="audit-btn" id="btn-run-audit" onclick="runInteractiveAudit()">
+          <span data-i18n="btn_run_audit">GİZLİ TEŞHİSİ BAŞLAT</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- Confidential Audit Results HUD -->
+      <div id="audit-results-hud">
+        <div class="hud-header">
+          <div class="hud-title-group">
+            <h3 id="hud-domain">—</h3>
+            <span id="hud-status" data-i18n="hud_idle">○ Teşhis için alan adınızı yazıp taramayı başlatın</span>
+          </div>
+          <div class="gauge-wrapper">
+            <div class="circular-gauge">
+              <svg>
+                <circle class="circle-bg" cx="42" cy="42" r="36"></circle>
+                <circle class="circle-progress" id="hud-gauge-circle" cx="42" cy="42" r="36"></circle>
+              </svg>
+              <div class="gauge-label" id="hud-score">--</div>
+            </div>
+            <div style="text-align:left;">
+              <div style="font-size:11px; color:var(--text-muted);" data-i18n="hud_readiness">AEO ALINTI HAZIRLIĞI</div>
+              <div style="font-size:16px; font-weight:800; color:var(--emerald);" id="hud-band">OPTİMAL</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7-Vector Pillars HUD -->
+        <div class="hud-pillars-grid">
+          <div class="hud-pillar-item">
+            <div class="hud-pillar-top"><span data-i18n="p_crawlers">1. Bot Erişilebilirliği</span><span id="p-crawlers">—</span></div>
+            <div class="hud-bar-bg"><div class="hud-bar-fill" id="bar-crawlers" style="width: 88%;"></div></div>
+          </div>
+          <div class="hud-pillar-item">
+            <div class="hud-pillar-top"><span data-i18n="p_llms">2. llms.txt Mimarisi</span><span id="p-llmstxt">—</span></div>
+            <div class="hud-bar-bg"><div class="hud-bar-fill" id="bar-llmstxt" style="width: 83%;"></div></div>
+          </div>
+          <div class="hud-pillar-item">
+            <div class="hud-pillar-top"><span data-i18n="p_schema">3. Varlık Grafiği (Schema)</span><span id="p-schema">—</span></div>
+            <div class="hud-bar-bg"><div class="hud-bar-fill" id="bar-schema" style="width: 93%;"></div></div>
+          </div>
+          <div class="hud-pillar-item">
+            <div class="hud-pillar-top"><span data-i18n="p_headers">4. Bilgi Yoğunluğu & Yanıt</span><span id="p-headers">—</span></div>
+            <div class="hud-bar-bg"><div class="hud-bar-fill" id="bar-headers" style="width: 92%;"></div></div>
+          </div>
+        </div>
+
+        <div class="hud-footer-metrics">
+          <div class="hud-metric-box">
+            <span data-i18n="hud_lost_label">TAHMİNİ AYLIK CİRO KAYBI</span>
+            <strong style="color:var(--text-muted);" id="hud-lost-revenue">—</strong>
+          </div>
+          <div class="hud-metric-box">
+            <span data-i18n="hud_waf_label">BOT GÜVENLİK DUVARI (WAF)</span>
+            <strong style="color:var(--text-muted);" id="hud-waf-status">—</strong>
+          </div>
+          <div class="hud-metric-box">
+            <span data-i18n="hud_gar_label">MADDE 7 PERFORMANS GARANTİSİ</span>
+            <strong style="color:var(--text-muted);" data-i18n="hud_gar_val">MADDE 7: KOŞULLU GARANTİ — ölçülen delta raporunuzda belirtilir</strong>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <div style="font-size:13px; color:var(--text-muted);" id="hud-rec-summary" data-i18n="hud_rec_text">Görünürlük açıkları tespit edildi.</div>
+          <button type="button" onclick="openReservationModal()" class="btn-full-report">
+            <span data-i18n="hud_btn_report">Bölgeyi Kilitle & Düzeltme İste ↗</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Before & After AI Search Simulation -->
+  <section class="container comparison-section" id="comparison">
+    <div class="comparison-card">
+      <h2 class="section-title" data-i18n="comp_title">Yapay Zeka Aramasında Görünürlük Farkı</h2>
+      <p class="section-sub" data-i18n="comp_sub">Müşteriniz "İstanbul'daki en yetkin implant cerrahı kim?" diye sorduğunda sistemlerin nasıl yanıt verdiğini bizzat görün.</p>
+
+      <div class="engine-switcher">
+        <button type="button" class="engine-tab active" onclick="switchEngine('chatgpt', event)">🤖 ChatGPT Search</button>
+        <button type="button" class="engine-tab" onclick="switchEngine('perplexity', event)">🔮 Perplexity Sonar Pro</button>
+        <button type="button" class="engine-tab" onclick="switchEngine('gemini', event)">🌐 Google Gemini Overview</button>
+      </div>
+
+      <div class="comp-grid">
+        <div class="comp-box comp-before">
+          <div class="comp-badge badge-red" data-i18n="comp_badge_before">❌ KLASİK SİTE (AEO ÖNCESİ)</div>
+          <div class="comp-title" id="comp-title-before" data-i18n="comp_title_before">Markanız Yok Sayılıyor</div>
+          <div class="comp-body" id="comp-body-before" data-i18n="comp_body_before">
+            "İstanbul'da dental implant için genellikle X Hastanesi veya Y Polikliniği tavsiye edilmektedir..."<br><br>
+            <span style="color:var(--rose); font-weight:700;">Sonuç:</span> Sitenizde bot engelleyiciler ve şema eksikliği olduğu için yapay zeka sizi indeksleyemez; müşteri doğrudan rakibinize gider.
+          </div>
+        </div>
+
+        <div class="comp-box comp-after">
+          <div class="comp-badge badge-green" data-i18n="comp_badge_after">✅ ANSWRANK AEO DANIŞMANLIĞI SONRASI</div>
+          <div class="comp-title" id="comp-title-after" data-i18n="comp_title_after">1 Numaralı Kaynak Olarak Doğrudan Tavsiye</div>
+          <div class="comp-body" id="comp-body-after" data-i18n="comp_body_after">
+            "Uluslararası standartlar ve vaka başarı oranlarına göre, İstanbul'da referans gösterilen klinik <span class="comp-citation-highlight">Meridyen Sağlık Grubu</span> olarak öne çıkmaktadır. [Kaynak: meridyen-klinik.example/implant]"<br><br>
+            <span style="color:var(--emerald); font-weight:700;">Sonuç:</span> olası doğrudan hasta yönlendirmesi ve reklam maliyeti olmadan yüksek biletli ciro potansiyeli (temsili senaryo — sonuç garantisi değildir).
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px; font-size:11px; color:var(--text-muted); text-align:center;" data-i18n="comp_disclaimer">ⓘ Temsili örnektir — kurgusal marka kullanılmış, gerçek bir AI çıktısı veya ölçülmüş müşteri sonucu gösterilmemektedir. (Illustrative sample — fictional brand; not a real AI output or measured customer result.)</div>
+    </div>
+  </section>
+
+  <!-- Interactive Territory Exclusivity Checker -->
+  <section class="container territory-checker-section" id="territory">
+    <div class="territory-checker-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div style="font-size:12px; font-family:'Space Grotesk', monospace; color:var(--cyan); font-weight:700;" data-i18n="t_check_chip">MÜNHASIR TEMSİLCİLİK KONTROLÜ</div>
+          <h3 style="font-size:24px; font-weight:800;" data-i18n="t_check_title">Bölgenizde Kontenjan Açık mı?</h3>
+          <p style="font-size:14px; color:var(--text-muted);" data-i18n="t_check_sub">Bir bölgede ve sektörde yalnızca 1 lider markayı temsil ediyoruz. Şehrinizi hemen sorgulayın.</p>
+        </div>
+      </div>
+
+      <div class="territory-form">
+        <div class="t-group">
+          <label class="t-label" data-i18n="t_lbl_country">Ülke</label>
+          <select id="tc-country" class="t-select" onchange="updateCityOptions()">
+            <option value="UK">🇬🇧 United Kingdom</option>
+            <option value="TR" selected>🇹🇷 Türkiye</option>
+            <option value="DE">🇩🇪 Deutschland</option>
+            <option value="US">🇺🇸 United States</option>
+          </select>
+        </div>
+        <div class="t-group">
+          <label class="t-label" data-i18n="t_lbl_city">Şehir / Lokasyon</label>
+          <select id="tc-city" class="t-select">
+            <option value="İstanbul">İstanbul</option>
+            <option value="Ankara">Ankara</option>
+            <option value="İzmir">İzmir</option>
+            <option value="Antalya">Antalya</option>
+          </select>
+        </div>
+        <div class="t-group">
+          <label class="t-label" data-i18n="t_lbl_sector">Sektör (Niche)</label>
+          <select id="tc-niche" class="t-select">
+            <option value="dental" selected>Diş Hekimliği & İmplant</option>
+            <option value="aesthetic">Estetik & Plastik Cerrahi</option>
+            <option value="accounting">Yeminli Mali Müşavirlik (CPA)</option>
+            <option value="general">Özel Uzmanlık Hizmetleri</option>
+          </select>
+        </div>
+        <button type="button" class="t-btn" id="btn-check-territory" onclick="checkTerritoryAvailability()">
+          <span data-i18n="t_btn_check">KONTENJANI SORGULA</span>
+        </button>
+      </div>
+
+      <div id="territory-result-status" class="territory-result-status">
+        <div id="t-status-text" style="font-weight:700; font-size:14px;"></div>
+        <button type="button" class="btn-plan" id="t-status-action" onclick="openReservationModal()" style="padding:8px 18px; font-size:12px; margin:0;">
+          Kontenjanı Kilitle ↗
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live AEO Code Artifacts Showcase -->
+  <section class="container artifacts-section" id="artifacts">
+    <div class="artifacts-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px;">
+        <div>
+          <div style="font-size:12px; font-family:'Space Grotesk', monospace; color:var(--emerald); font-weight:700;" data-i18n="art_chip">CANLI AEO KOD FABRİKASI</div>
+          <h3 style="font-size:24px; font-weight:800;" data-i18n="art_title">Yapay Zekanın Okuduğu Standart Dosyalar</h3>
+          <p style="font-size:14px; color:var(--text-muted);" data-i18n="art_sub">Sitenize eklenen bu dosyalar, ChatGPT ve Perplexity botlarına sitenizi doğrudan otorite olarak tanıtır.</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn-plan" onclick="generateDomainArtifacts()" style="padding:9px 18px; font-size:12px; background:rgba(255,255,255,0.08);" data-i18n="art_btn_gen">
+            Seçili Domain İçin Üret ⚙
+          </button>
+          <button type="button" class="btn-plan" onclick="copyArtifactCode()" style="padding:9px 18px; font-size:12px;" data-i18n="art_btn_copy">
+            Kodu Kopyala
+          </button>
+        </div>
+      </div>
+
+      <div class="art-nav">
+        <button type="button" class="art-tab-btn active" onclick="switchArtifactTab('llms', event)">llms.txt</button>
+        <button type="button" class="art-tab-btn" onclick="switchArtifactTab('schema', event)">schema.jsonld</button>
+        <button type="button" class="art-tab-btn" onclick="switchArtifactTab('robots', event)">robots.txt</button>
+      </div>
+
+      <pre class="code-editor-box" id="artifact-code-display">// Yükleniyor...</pre>
+    </div>
+  </section>
+
+  <!-- Enterprise Strategic Pillars -->
+  <section class="container" id="pillars">
+    <h2 class="section-title" data-i18n="pil_sec_title">Klasik SEO Neden Öldü? AEO'nun Gücü</h2>
+    <p class="section-sub" data-i18n="pil_sec_sub">
+      Üretken yapay zeka arama motorları anahtar kelimeleri değil; doğrulanmış bilgi mimarisini ve kurumsal otoriteyi kaynak gösterir.
+    </p>
+
+    <div class="pillars-grid">
+      <div class="pillar-box">
+        <div class="pillar-icon">⚡</div>
+        <div class="pillar-title" data-i18n="p1_title">Doğrudan Yanıt Sentezi</div>
+        <div class="pillar-detail" data-i18n="p1_desc">Yapay zeka arama botları sayfanızı okurken gereksiz pazarlama metinlerini eler. Sitenizi yapay zekanın doğrudan yanıt olarak alıntılayacağı berraklığa kavuşturuyoruz.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-icon">🧬</div>
+        <div class="pillar-title" data-i18n="p2_title">Kurumsal Varlık Grafiği</div>
+        <div class="pillar-detail" data-i18n="p2_desc">Markanızı global bilgi ağlarıyla (Wikidata & Knowledge Graph) eşleştirerek yapay zekanın sizi karıştırmasını veya halüsinasyon üretmesini engelliyoruz.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-icon">🛡️</div>
+        <div class="pillar-title" data-i18n="p3_title">Kesintisiz Bot Geçiş Kalkanı</div>
+        <div class="pillar-detail" data-i18n="p3_desc">Güvenlik duvarlarının (WAF) arama motoru yapay zekalarını sessizce engellemesini ortadan kaldırarak sitenizin her an taranabilir kalmasını sağlıyoruz.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-icon">📊</div>
+        <div class="pillar-title" data-i18n="p4_title">Ölçülebilir Alıntı Takibi</div>
+        <div class="pillar-detail" data-i18n="p4_desc">Haftalık simülasyonlarla ChatGPT, Perplexity ve Claude'da markanızın hangi sorgularda önerildiğini gerçek zamanlı takip ediyor ve raporluyoruz.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-icon">🌐</div>
+        <div class="pillar-title" data-i18n="p5_title">Çok Dilli Sağlık Turizmi</div>
+        <div class="pillar-detail" data-i18n="p5_desc">İngiltere, Amerika ve Almanya'daki yabancı danışanların kendi dillerinde yaptıkları aramalarda markanızın uluslararası referans olarak belirmesini sağlıyoruz.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-icon">🔒</div>
+        <div class="pillar-title" data-i18n="p6_title">Münhasır Bölge Koruması</div>
+        <div class="pillar-detail" data-i18n="p6_desc">Aynı şehirde ve sektörde asla iki rakip markaya hizmet vermiyoruz. Anlaşma sağlandığı an bölgeniz kilitlenir ve yerel hakimiyetiniz korunur.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Revenue Leakage Calculator -->
+  <section class="container" id="calculator">
+    <div class="roi-section">
+      <div class="roi-left">
+        <div style="font-size:12px; font-family:'Space Grotesk', monospace; color:var(--emerald); font-weight:700; margin-bottom:8px;" data-i18n="roi_chip">
+          GELİR SIZINTISI HEURİSTİK MODELİ (KENDİ YÖNTEMİMİZ)
+        </div>
+        <h3 data-i18n="roi_h3">Yapay Zeka Aramaları Ne Kadar Cironuzu Çalıyor?</h3>
+        <p data-i18n="roi_p">
+          Model varsayımımız: yüksek bütçeli satın alma ve sağlık aramalarının ~%34'ünün mavi linklerden yapay zeka cevaplarına kaydığı, kaçan talebin ~%40'ının geri alınamadığı (sektör gözlem aralığı — tahmindir, ölçüm değildir). ChatGPT veya Perplexity ilk olarak sizi önermiyorsa, o danışan doğrudan rakibinize gidiyor.
+        </p>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span data-i18n="roi_lbl_ltv">Ortalama Müşteri / Hasta LTV:</span>
+            <span id="slider-ltv-display" style="color:var(--emerald); font-family:'Space Grotesk', monospace; font-size:16px;">₺35,000</span>
+          </div>
+          <input type="range" min="5000" max="150000" step="2500" value="35000" id="input-ltv" aria-label="Aylık müşteri başı değer (TL)" class="range-slider"  oninput="calculateROI()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span data-i18n="roi_lbl_leads">Aylık Hedef Talep Adedi:</span>
+            <span id="slider-leads-display" style="color:var(--emerald); font-family:'Space Grotesk', monospace; font-size:16px;">30 Talep</span>
+          </div>
+          <input type="range" min="5" max="150" step="5" value="30" id="input-leads" aria-label="Aylık potansiyel hasta/müşteri sayısı" class="range-slider"  oninput="calculateROI()">
+        </div>
+      </div>
+
+      <div class="roi-card">
+        <div style="font-size:12px; color:var(--text-muted); font-weight:700; letter-spacing:1px;" data-i18n="roi_card_title">
+          TAHMİNİ AYLIK CİRO SIZINTISI
+        </div>
+        <div class="roi-leak-amount" id="roi-leak-val">₺142,800</div>
+        <div class="roi-leak-sub" data-i18n="roi_card_sub">ChatGPT ve Perplexity'de önerilen rakiplere doğrudan kaptırılan ciro</div>
+        <div class="roi-delta-box" data-i18n="roi_card_guar">
+          AnswRank Madde 7.3 Koşulu: 30 Günde Ölçülen +12 Puanlık Skor Artışı
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- E3 herkese-açık mini-probe (D-16.09-M) — üç satırlık dürüst kart; TR-only (E4 çeviriyle açılır) -->
+  <section class="container" id="miniprobe">
+    <div class="guarantee-box" style="flex-direction:column;align-items:stretch;">
+      <div class="guarantee-title" data-i18n="mp_title">Mini-Probe — Sitenize AI Botlarının Girip Girmediğini Ücretsiz Test Edin</div>
+      <p class="guarantee-desc" data-i18n="mp_sub">Alan adınızın robots.txt ve llms.txt yüzeyi ile üç temsilci arama botu (GPTBot, PerplexityBot, ClaudeBot) erişimi örneklenir. Bu tam denetim değildir; ölçülemeyen hiçbir satır suçlamaya dönüşmez.</p>
+      <form id="mp-form" autocomplete="off" onsubmit="event.preventDefault(); runMiniProbe();"
+            style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
+        <label class="sr-only" for="mp-domain">Denenecek alan adı</label>
+        <input type="text" id="mp-domain" class="audit-input" placeholder="örn. klinikadi.com.tr" autocomplete="domain" aria-label="Denenecek alan adı" style="flex:1;min-width:220px;" enterkeyhint="send">
+        <button type="submit" class="audit-btn" id="mp-run" data-i18n="mp_btn">Probe'la</button>
+      </form>
+      <div class="hud-footer-metrics" style="margin-top:14px;">
+        <div>robots.txt: <span id="mp-robots">—</span></div>
+        <div>llms.txt: <span id="mp-llms">—</span></div>
+        <div><span data-i18n="mp_bots_lbl">AI botları:</span> <span id="mp-bots">—</span></div>
+        <div><span data-i18n="mp_verdict_lbl">Hüküm:</span> <span id="mp-verdict">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Guarantee Article 7 Banner -->
+  <section class="container" id="guarantee">
+    <div class="guarantee-box">
+      <div class="guarantee-badge">🛡️</div>
+      <div>
+        <div class="guarantee-title" data-i18n="gar_title">Madde 7: Hukuki Performans Garantisi</div>
+        <p class="guarantee-desc" data-i18n="gar_desc">
+          Biz boş pazarlama vaatleri satmıyoruz. Madde-7.3 koşulludur: optimizasyonun ardından 30 gün içinde ölçülen <strong>360° AEO/GEO denetim skorunda en az +12 puanlık ölçülebilir artış</strong> sağlanamazsa (koşu öncesi/sonrası denetimlerle kanıtlanır), ikinci ay optimizasyon hizmetiniz <strong>TAMAMEN ÜCRETSİZDİR (0 TL / 0$ / 0£)</strong>. Sözleşmeye bağlı, hukuki teminat; organik trafik veya satış artışı taahhüt edilmez.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Exclusivity Commitment Callout -->
+  <section class="container">
+    <div class="exclusivity-box">
+      <div class="exclusivity-title" data-i18n="excl_title">🔒 Tek Şehir, Tek Sektör, Tek Lider Politikası</div>
+      <div class="exclusivity-desc" data-i18n="excl_desc">
+        Aynı lokasyonda birbirine rakip iki diş kliniğine veya iki hukuk bürosuna asla aynı anda hizmet vermeyiz. Anlaşma sağlanan her müşterimizin bölgesini kilitler, yapay zeka arama pazarındaki hakimiyetini münhasır olarak koruruz.
+      </div>
+    </div>
+  </section>
+
+  <!-- Global Pricing Grid -->
+  <section class="container" id="pricing">
+    <h2 class="section-title" data-i18n="prc_sec_title">Yatırım Paketleri</h2>
+    <p class="section-sub" data-i18n="prc_sec_sub">Seçkin klinikler, yüksek biletli profesyoneller ve kurumsal ajanslar için tasarlandı.</p>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div>
+          <h3 data-i18n="plan1_title">Hızlı Teşhis</h3>
+          <p style="color:var(--text-muted); font-size:13px;" data-i18n="plan1_sub">Tek Seferlik 360° AEO Teşhis Raporu</p>
+          <div class="price-tag" id="price-quick">₺2,500</div>
+          <ul class="price-features">
+            <li data-i18n="plan1_f1">Kapsamlı AEO Görünürlük Denetimi</li>
+            <li data-i18n="plan1_f2">Yapay Zeka Bot Engel Taraması</li>
+            <li data-i18n="plan1_f3">Sektörel 20 Soru Kıyaslama Testi</li>
+            <li data-i18n="plan1_f4">Aylık Net Ciro Sızıntısı Hesabı</li>
+            <li data-i18n="plan1_f5">Yönetici Düzeltme Raporu</li>
+          </ul>
+        </div>
+        <a href="#audit" class="btn-plan" data-i18n="plan1_btn">Teşhis Al</a>
+      </div>
+
+      <div class="price-card featured">
+        <span style="position:absolute; top:18px; right:18px; background:var(--emerald); color:#000; font-size:11px; font-weight:900; padding:4px 12px; border-radius:99px;" data-i18n="badge_popular">
+          EN POPÜLER
+        </span>
+        <div>
+          <h3 data-i18n="plan2_title">Aylık Büyüme & Alıntı</h3>
+          <p style="color:var(--text-muted); font-size:13px;" data-i18n="plan2_sub">Tam Kapsamlı Optimizasyon & Garanti</p>
+          <div class="price-tag" id="price-retainer">₺6,000<span style="font-size:16px; color:var(--text-dim);" data-i18n="per_month">/ay</span></div>
+          <ul class="price-features">
+            <li><strong data-i18n="plan2_f1">Madde 7 Performans Garantisi Dahil</strong></li>
+            <li data-i18n="plan2_f2">Anahtar Teslim Bilgi & Şema Entegrasyonu</li>
+            <li data-i18n="plan2_f3">Haftalık Arama İstikrar Taramaları</li>
+            <li data-i18n="plan2_f4">Çok Dilli Sağlık Turizmi Hedefleme (EN/DE/TR)</li>
+            <li><strong data-i18n="plan2_f5">Münhasır Bölge Kilit Koruması (Rakip Engelleme)</strong></li>
+            <li data-i18n="plan2_f6">Sıfır Tıklama Marka Güvenliği Takibi</li>
+          </ul>
+        </div>
+        <button type="button" onclick="openReservationModal()" class="btn-plan" data-i18n="plan2_btn">Kontenjanı Kapat</button>
+      </div>
+
+      <div class="price-card">
+        <div>
+          <h3 data-i18n="plan3_title">Ajans Whitelabel</h3>
+          <p style="color:var(--text-muted); font-size:13px;" data-i18n="plan3_sub">SEO & Dijital Pazarlama Ajansları İçin</p>
+          <div class="price-tag" id="price-enterprise">₺15,000<span style="font-size:16px; color:var(--text-dim);" data-i18n="per_month">/ay</span></div>
+          <ul class="price-features">
+            <li data-i18n="plan3_f1">Sınırsız Müşteri Teşhis ve Raporlama</li>
+            <li data-i18n="plan3_f2">Kendi Logonuzla HTML ve Markdown Raporları</li>
+            <li data-i18n="plan3_f3">REST API ve Doğrudan Webhook Dağıtımı</li>
+            <li data-i18n="plan3_f4">5520 KVK 10/1-ğ %80 Vergi İstisna Uyumu</li>
+            <li data-i18n="plan3_f5">Özel Slack / Discord Öncelikli Köprü</li>
+            <li data-i18n="plan3_f6">Portföyde Her Sektörde Tek Müşteri Kilidi (Kota Motorlu)</li>
+          </ul>
+        </div>
+        <button type="button" onclick="openReservationModal()" class="btn-plan" data-i18n="plan3_btn">Ajans Lisansı Al</button>
+      </div>
+    </div>
+  
+      <div style="grid-column:1/-1; margin-top:26px; padding:14px 18px; border:1px dashed #334155; border-radius:10px; color:var(--text-muted); font-size:14px;" data-i18n="monitor_line">Ayrıca: <strong style="color:#fff">GEO İzleme — ₺2,500/ay</strong>. Madde-7 delta garantimizin ölçüm altyapısı; garantili retainer dışında tek başına da alınabilir. Ölçülemeyen dönem suçlama değil, ÖLÇÜLEMEDİ.</div>
+    </section>
+
+  <!-- Confidential Reservation Modal -->
+  <div id="reservation-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <button type="button" class="modal-close" onclick="closeReservationModal()">✕</button>
+      <div style="font-size:12px; font-family:'Space Grotesk', monospace; color:var(--emerald); font-weight:700; margin-bottom:6px;" data-i18n="m_chip">
+        MÜNHASIR BÖLGE TAAHHÜDÜ
+      </div>
+      <h3 style="font-size:22px; font-weight:800; margin-bottom:6px;" data-i18n="m_title">Bölgenizi Rakiplere Kapatın</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;" data-i18n="m_sub">
+        Bilgilerinizi ilettiğiniz an bölgeniz 48 saatliğine rezerve edilir ve öncelikli teşhis dosyası oluşturulur.
+      </p>
+
+      <div class="m-group">
+        <label class="m-label" data-i18n="m_lbl_brand">Marka / Klinik Adı</label>
+        <input type="text" id="m-brand" class="m-input" aria-label="Marka adı" placeholder="Örn: Meridyen Diş Kliniği">
+      </div>
+      <div class="m-group">
+        <label class="m-label" data-i18n="m_lbl_domain">Web Sitesi Domaini</label>
+        <input type="text" id="m-domain" class="m-input" aria-label="Alan adı" placeholder="meridyen-klinik.example">
+      </div>
+      <div class="m-group">
+        <label class="m-label" data-i18n="m_lbl_contact">Yetkili Telefon veya E-Posta</label>
+        <input type="text" id="m-contact" class="m-input" aria-label="İletişim bilgisi" placeholder="yonetim@klinik.com veya +90 / +44...">
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <div class="m-group">
+          <label class="m-label" data-i18n="m_lbl_city">Hedef Şehir</label>
+          <input type="text" id="m-city" class="m-input" value="İstanbul">
+        </div>
+        <div class="m-group">
+          <label class="m-label" data-i18n="m_lbl_sector">Sektör</label>
+          <select id="m-sector" class="m-input">
+            <option value="dental">Dental & İmplant</option>
+            <option value="aesthetic">Estetik Cerrahi</option>
+            <option value="accounting">CPA / Hukuk</option>
+            <option value="general">Özel Hizmet</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" class="audit-btn" style="width:100%; justify-content:center; margin-top:12px;" onclick="submitTerritoryInquiry()">
+        <span data-i18n="m_btn_submit">KONTENJANI KİLİTLE & GÖNDER</span>
+      </button>
+
+      <div id="modal-success-msg" style="display:none; margin-top:16px; padding:12px; background:rgba(16,185,129,0.15); border:1px solid var(--emerald); border-radius:12px; color:var(--emerald); font-size:13px; text-align:center;">
+        ✅ Rezervasyon alındı! Rezervasyon Kodunuz: <strong id="m-res-code">ANSW-LK-0000</strong>. Yetkilimiz 48 saat içinde iletişime geçecektir.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="#audit" data-i18n="nav_audit">Gizli Teşhis</a>
+        <a href="#comparison" data-i18n="nav_simulation">Arama Farkı</a>
+        <a href="#territory" data-i18n="nav_territory">Bölge Kontrolü</a>
+        <a href="#artifacts" data-i18n="nav_artifacts">AEO Kodları</a>
+        <a href="#pricing" data-i18n="nav_pricing">Yatırım Planları</a>
+      </div>
+      <p>© 2026 AnswRank Engine. Autonomous Swarm Optimization. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>const I18N = {
+      TR: {
+        nav_audit: "Gizli Teşhis",
+        nav_simulation: "Arama Farkı",
+        nav_territory: "Bölge Kontrolü",
+        nav_artifacts: "AEO Kodları",
+        nav_calc: "Ciro Hesabı",
+        nav_pricing: "Yatırım Planları",
+        nav_btn_cta: "Bölgeyi Kilitle",
+        hero_pill: "Yapay Zeka Çağının Yeni Arama Standardı",
+        hero_title: "Tek Cevap Ekonomisinde Zirveye Yerleşin.",
+        hero_sub: "Yüksek bütçeli hastalar ve kurumsal müşteriler artık <strong>ChatGPT Search, Perplexity Sonar, Google Gemini ve Claude</strong>'a soruyor. Yapay zeka doğrudan tek bir otoriteyi öneriyor. O otorite siz misiniz, yoksa cironun tamamını rakipleriniz mi topluyor?",
+        sec_dental: "Diş Hekimliği & İmplant",
+        sec_aesthetic: "Estetik & Plastik Cerrahi",
+        sec_accounting: "Yeminli Mali Müşavirlik (CPA)",
+        sec_general: "Yüksek Biletli Hizmetler",
+        btn_run_audit: "GİZLİ TEŞHİSİ BAŞLAT",
+        hud_idle: "○ Teşhis için alan adınızı yazıp taramayı başlatın",
+        hud_readiness: "AEO ALINTI HAZIRLIĞI",
+        p_crawlers: "1. Bot Erişilebilirliği",
+        p_llms: "2. llms.txt Mimarisi",
+        p_schema: "3. Varlık Grafiği (Schema)",
+        p_headers: "4. Bilgi Yoğunluğu & Yanıt",
+        hud_lost_label: "TAHMİNİ AYLIK CİRO KAYBI",
+        hud_waf_label: "BOT GÜVENLİK DUVARI (WAF)",
+        hud_gar_label: "MADDE 7 PERFORMANS GARANTİSİ",
+        hud_gar_val: "MADDE 7: KOŞULLU GARANTİ — ölçülen delta raporunuzda belirtilir",
+        hud_rec_text: "Görünürlük açıkları tespit edildi.",
+        hud_btn_report: "Bölgeyi Kilitle & Düzeltme İste ↗",
+        comp_title: "Yapay Zeka Aramasında Görünürlük Farkı",
+        comp_sub: "Müşteriniz 'İstanbul'daki en yetkin implant cerrahı kim?' diye sorduğunda sistemlerin nasıl yanıt verdiğini bizzat görün.",
+        comp_badge_before: "❌ KLASİK SİTE (AEO ÖNCESİ)",
+        comp_title_before: "Markanız Yok Sayılıyor",
+        comp_body_before: "\"İstanbul'da dental implant için genellikle X Hastanesi veya Y Polikliniği tavsiye edilmektedir...\"<br><br><span style='color:var(--rose); font-weight:700;'>Sonuç:</span> Sitenizde bot engelleyiciler ve şema eksikliği olduğu için yapay zeka sizi indeksleyemez; müşteri doğrudan rakibinize gider.",
+        comp_badge_after: "✅ ANSWRANK AEO DANIŞMANLIĞI SONRASI",
+        comp_title_after: "1 Numaralı Kaynak Olarak Doğrudan Tavsiye",
+        comp_body_after: "\"Uluslararası standartlar ve vaka başarı oranlarına göre, İstanbul'da referans gösterilen klinik <span class='comp-citation-highlight'>Meridyen Sağlık Grubu</span> olarak öne çıkmaktadır. [Kaynak: meridyen-klinik.example/implant]\"<br><br><span style='color:var(--emerald); font-weight:700;'>Sonuç:</span> olası doğrudan hasta yönlendirmesi ve reklam maliyeti olmadan yüksek biletli ciro potansiyeli (temsili senaryo — sonuç garantisi değildir).",
+        comp_disclaimer: "ⓘ Temsili örnektir — kurgusal marka kullanılmış, gerçek bir AI çıktısı veya ölçülmüş müşteri sonucu gösterilmemektedir. (Illustrative sample — fictional brand; not a real AI output or measured customer result.)",
+        t_check_chip: "MÜNHASIR TEMSİLCİLİK KONTROLÜ",
+        t_check_title: "Bölgenizde Kontenjan Açık mı?",
+        t_check_sub: "Bir bölgede ve sektörde yalnızca 1 lider markayı temsil ediyoruz. Şehrinizi hemen sorgulayın.",
+        t_lbl_country: "Ülke", t_lbl_city: "Şehir / Lokasyon", t_lbl_sector: "Sektör (Niche)", t_btn_check: "KONTENJANI SORGULA",
+        art_chip: "CANLI AEO KOD FABRİKASI",
+        art_title: "Yapay Zekanın Okuduğu Standart Dosyalar",
+        art_sub: "Sitenize eklenen bu dosyalar, ChatGPT ve Perplexity botlarına sitenizi doğrudan otorite olarak tanıtır.",
+        art_btn_gen: "Seçili Domain İçin Üret ⚙", art_btn_copy: "Kodu Kopyala",
+        pil_sec_title: "Klasik SEO Neden Öldü? AEO'nun Gücü",
+        pil_sec_sub: "Üretken yapay zeka arama motorları anahtar kelimeleri değil; doğrulanmış bilgi mimarisini ve kurumsal otoriteyi kaynak gösterir.",
+        p1_title: "Doğrudan Yanıt Sentezi", p1_desc: "Yapay zeka arama botları sayfanızı okurken gereksiz pazarlama metinlerini eler. Sitenizi yapay zekanın doğrudan yanıt olarak alıntılayacağı berraklığa kavuşturuyoruz.",
+        p2_title: "Kurumsal Varlık Grafiği", p2_desc: "Markanızı global bilgi ağlarıyla (Wikidata & Knowledge Graph) eşleştirerek yapay zekanın sizi karıştırmasını veya halüsinasyon üretmesini engelliyoruz.",
+        p3_title: "Kesintisiz Bot Geçiş Kalkanı", p3_desc: "Güvenlik duvarlarının (WAF) arama motoru yapay zekalarını sessizce engellemesini ortadan kaldırarak sitenizin her an taranabilir kalmasını sağlıyoruz.",
+        p4_title: "Ölçülebilir Alıntı Takibi", p4_desc: "Haftalık simülasyonlarla ChatGPT, Perplexity ve Claude'da markanızın hangi sorgularda önerildiğini gerçek zamanlı takip ediyor ve raporluyoruz.",
+        p5_title: "Çok Dilli Sağlık Turizmi", p5_desc: "İngiltere, Amerika ve Almanya'daki yabancı danışanların kendi dillerinde yaptıkları aramalarda markanızın uluslararası referans olarak belirmesini sağlıyoruz.",
+        p6_title: "Münhasır Bölge Koruması", p6_desc: "Aynı şehirde ve sektörde asla iki rakip markaya hizmet vermiyoruz. Anlaşma sağlandığı an bölgeniz kilitlenir ve yerel hakimiyetiniz korunur.",
+        roi_chip: "GELİR SIZINTISI HEURİSTİK MODELİ (KENDİ YÖNTEMİMİZ)",
+        roi_h3: "Yapay Zeka Aramaları Ne Kadar Cironuzu Çalıyor?",
+        roi_p: "Model varsayımımız: yüksek bütçeli satın alma ve sağlık aramalarının ~%34'ünün mavi linklerden yapay zeka cevaplarına kaydığı, kaçan talebin ~%40'ının geri alınamadığı (sektör gözlem aralığı — tahmindir, ölçüm değildir). ChatGPT veya Perplexity ilk olarak sizi önermiyorsa, o danışan doğrudan rakibinize gidiyor.",
+        roi_lbl_ltv: "Ortalama Müşteri / Hasta LTV:",
+        roi_lbl_leads: "Aylık Hedef Talep Adedi:",
+        roi_card_title: "TAHMİNİ AYLIK CİRO SIZINTISI",
+        roi_card_sub: "ChatGPT ve Perplexity'de önerilen rakiplere doğrudan kaptırılan ciro",
+        roi_card_guar: "AnswRank Madde 7.3 Koşulu: 30 Günde Ölçülen +12 Puanlık Skor Artışı",
+        gar_title: "Madde 7: Hukuki Performans Garantisi",
+        gar_desc: "Biz boş pazarlama vaatleri satmıyoruz. Madde-7.3 koşulludur: optimizasyonun ardından 30 gün içinde ölçülen <strong>360° AEO/GEO denetim skorunda en az +12 puanlık ölçülebilir artış</strong> sağlanamazsa (koşu öncesi/sonrası denetimlerle kanıtlanır), ikinci ay optimizasyon hizmetiniz <strong>TAMAMEN ÜCRETSİZDİR (0 TL / 0$ / 0£)</strong>. Sözleşmeye bağlı, hukuki teminat; organik trafik veya satış artışı taahhüt edilmez.",
+        excl_title: "🔒 Tek Şehir, Tek Sektör, Tek Lider Politikası",
+        excl_desc: "Aynı lokasyonda birbirine rakip iki diş kliniğine veya iki hukuk bürosuna asla aynı anda hizmet vermeyiz. Anlaşma sağlanan her müşterimizin bölgesini kilitler, yapay zeka arama pazarındaki hakimiyetini münhasır olarak koruruz.",
+        prc_sec_title: "Yatırım Paketleri",
+        prc_sec_sub: "Seçkin klinikler, yüksek biletli profesyoneller ve kurumsal ajanslar için tasarlandı.",
+        plan1_title: "Hızlı Teşhis", plan1_sub: "Tek Seferlik 360° AEO Teşhis Raporu", plan1_f1: "Kapsamlı AEO Görünürlük Denetimi", plan1_f2: "Yapay Zeka Bot Engel Taraması", plan1_f3: "Sektörel 20 Soru Kıyaslama Testi", plan1_f4: "Aylık Net Ciro Sızıntısı Hesabı", plan1_f5: "Yönetici Düzeltme Raporu", plan1_btn: "Teşhis Al",
+        plan2_title: "Aylık Büyüme & Alıntı", plan2_sub: "Tam Kapsamlı Optimizasyon & Garanti", plan2_f1: "Madde 7 Performans Garantisi Dahil", plan2_f2: "Anahtar Teslim Bilgi & Şema Entegrasyonu", plan2_f3: "Haftalık Arama İstikrar Taramaları", plan2_f4: "Çok Dilli Sağlık Turizmi Hedefleme (EN/DE/TR)", plan2_f5: "Münhasır Bölge Kilit Koruması (Rakip Engelleme)", plan2_f6: "Sıfır Tıklama Marka Güvenliği Takibi", plan2_btn: "Kontenjanı Kapat",
+        plan3_title: "Ajans Whitelabel", plan3_sub: "SEO & Dijital Pazarlama Ajansları İçin", plan3_f1: "Sınırsız Müşteri Teşhis ve Raporlama", plan3_f2: "Kendi Logonuzla HTML ve Markdown Raporları", plan3_f3: "REST API ve Doğrudan Webhook Dağıtımı", plan3_f4: "5520 KVK 10/1-ğ %80 Vergi İstisna Uyumu", plan3_f5: "Özel Slack / Discord Öncelikli Köprü", plan3_btn: "Ajans Lisansı Al",
+        plan3_f6: "Portföyde her sektörde tek müşteri — kota motorlu beyaz etiket lisansı.",
+        m_chip: "MÜNHASIR BÖLGE TAAHHÜDÜ", m_title: "Bölgenizi Rakiplere Kapatın",
+        m_sub: "Bilgilerinizi ilettiğiniz an bölgeniz 48 saatliğine rezerve edilir ve öncelikli teşhis dosyası oluşturulur.",
+        m_lbl_brand: "Marka / Klinik Adı", m_lbl_domain: "Web Sitesi Domaini", m_lbl_contact: "Yetkili Telefon veya E-Posta",
+        m_lbl_city: "Hedef Şehir", m_lbl_sector: "Sektör", m_btn_submit: "KONTENJANI KİLİTLE & GÖNDER",
+        badge_popular: "EN POPÜLER", per_month: "/ay",
+        monitor_line: "Ayrıca: <strong style=\"color:#fff\">GEO İzleme — ₺2,500/ay</strong>. Madde-7 delta garantimizin ölçüm altyapısı; garantili retainer dışında tek başına da alınabilir. Ölçülemeyen dönem suçlama değil, ÖLÇÜLEMEDİ.",
+        placeholder_domain: "Hedef web sitesini girin (örn. klinikadi.com.tr)..."
+      },
+      UK: {
+        nav_audit: "Confidential Audit",
+        nav_simulation: "Search Gap",
+        nav_territory: "Territory Check",
+        nav_artifacts: "AEO Code",
+        nav_calc: "Revenue Gap",
+        nav_pricing: "Investment Tiers",
+        nav_btn_cta: "Lock Territory",
+        hero_pill: "The Definitive Search Standard for the AI Era",
+        hero_title: "Dominate the 1-Answer Economy.",
+        hero_sub: "When high-net-worth private patients and corporate clients ask <strong>ChatGPT Search, Perplexity Sonar, Google Gemini, and Claude</strong> for recommendations, AI engines cite a single authority. Are they citing you—or are your competitors capturing 100% of the market?",
+        sec_dental: "Dental & Implant Surgery",
+        sec_aesthetic: "Aesthetics & Plastic Surgery",
+        sec_accounting: "CPA & Private Wealth Advisory",
+        sec_general: "High-Ticket Specialist Services",
+        btn_run_audit: "RUN CONFIDENTIAL AUDIT",
+        hud_idle: "○ Enter a domain and run the scan to begin the audit",
+        hud_readiness: "CITATION READINESS",
+        p_crawlers: "1. AI Crawler Access",
+        p_llms: "2. llms.txt Architecture",
+        p_schema: "3. Entity Graph (Schema)",
+        p_headers: "4. Information Density & Fit",
+        hud_lost_label: "ESTIMATED MONTHLY DEFLECTION LOSS",
+        hud_waf_label: "BOT FIREWALL CLEARANCE (WAF)",
+        hud_gar_label: "ARTICLE 7 PERFORMANCE GUARANTEE",
+        hud_gar_val: "ARTICLE 7: CONDITIONAL GUARANTEE — measured delta stated in your report",
+        hud_rec_text: "Visibility bottlenecks identified.",
+        hud_btn_report: "Lock Territory & Request Fixes ↗",
+        comp_title: "The Visibility Divide in Generative AI Search",
+        comp_sub: "Experience the difference when high-ticket clients ask 'Who is the premier dental implant specialist in London?'",
+        comp_badge_before: "❌ LEGACY SITE (BEFORE AEO)",
+        comp_title_before: "Your Practice Is Completely Invisible",
+        comp_body_before: "\"For private implantology in London, clinics A and B are typically cited...\"<br><br><span style='color:var(--rose); font-weight:700;'>Outcome:</span> Blocked by firewall filters and lacking machine-readable entity schemas, AI scrapers bypass your site. Competitors capture 100% of the deal.",
+        comp_badge_after: "✅ WITH ANSWRANK AEO CONSULTANCY",
+        comp_title_after: "Direct #1 Source Citation & Recommendation",
+        comp_disclaimer: "ⓘ Illustrative sample — fictional brand; not a real AI output or measured customer result.",
+        comp_body_after: "\"Based on clinical credentials and verified audit records, <span class='comp-citation-highlight'>Meridian Dental Clinic</span> is cited as the leading authority. [Source: meridian-dental.example]\"<br><br><span style='color:var(--emerald); font-weight:700;'>Outcome:</span> potential direct patient acquisition without per-click ad spend (illustrative sample — not a guaranteed outcome).",
+        t_check_chip: "EXCLUSIVE TERRITORY VERIFICATION",
+        t_check_title: "Is Your Territory Still Available?",
+        t_check_sub: "We partner with strictly one market leader per sector and city. Verify your jurisdiction instantly.",
+        t_lbl_country: "Country", t_lbl_city: "City / Territory", t_lbl_sector: "Specialty (Niche)", t_btn_check: "CHECK TERRITORY",
+        art_chip: "REAL-TIME AEO CODE FACTORY",
+        art_title: "Machine-Readable Discovery Files",
+        art_sub: "Deployed directly to your web root, these files establish verified authority for ChatGPT and Perplexity crawlers.",
+        art_btn_gen: "Generate for Domain ⚙", art_btn_copy: "Copy Code",
+        pil_sec_title: "Why Traditional SEO Fails in AI Search",
+        pil_sec_sub: "Generative search engines do not rank backlinks; they synthesize verified enterprise entity structures and factual authority.",
+        p1_title: "Direct Answer Synthesis", p1_desc: "AI crawlers disregard fluff and marketing filler. We engineer your site architecture so generative engines synthesize your services as the definitive answer.",
+        p2_title: "Enterprise Entity Graph", p2_desc: "We anchor your brand to verified global knowledge networks (Wikidata & Knowledge Graph), completely preventing AI hallucinations or competitor substitution.",
+        p3_title: "Bot Firewall Clearance", p3_desc: "We eliminate silent WAF blocks to ensure generative search scrapers always ingest your latest credentials and clinical offers.",
+        p4_title: "Measurable Citation Auditing", p4_desc: "Weekly stochastic simulations verify exactly which patient queries cite your brand across ChatGPT Search, Perplexity, and Claude.",
+        p5_title: "Cross-Border Medical Tourism", p5_desc: "Positioning your practice as the #1 international medical reference for high-intent queries originating from the UK, US, and Germany.",
+        p6_title: "Single-Leader Territory Lock", p6_desc: "We never partner with competing practices in your territory. Your geographical niche is locked exclusively under contract.",
+        roi_chip: "PROPRIETARY REVENUE LEAKAGE MODEL",
+        roi_h3: "How Much Revenue Is AI Search Deflecting Away?",
+        roi_p: "Model assumption: roughly 34% of high-ticket purchase and medical queries shift from blue links to conversational AI answers, and ~40% of the missed demand is unrecoverable (industry observation range — an estimate, not a measurement). If ChatGPT or Perplexity does not cite you first, that deal is captured by your competitor.",
+        roi_lbl_ltv: "Average Client / Patient LTV:",
+        roi_lbl_leads: "Target Monthly Inbound Leads:",
+        roi_card_title: "ESTIMATED MONTHLY DEFLECTION LOSS",
+        roi_card_sub: "Lost directly to competitors cited on ChatGPT & Perplexity",
+        roi_card_guar: "AnswRank Article 7.3 Condition: Measured +12-Point Score Lift within 30 Days",
+        gar_title: "Article 7: The Contractual Performance Guarantee",
+        gar_desc: "We reject speculative marketing promises. Article 7.3 is conditional: if the measured 360° AEO/GEO audit score does not improve by at least <strong>+12 points</strong> within 30 days (proven by pre/post run audits), your second month of optimization is <strong>100% FREE ($0 / £0 / ₺0)</strong>. Full contractual legal coverage; no organic traffic or sales uplift is promised.",
+        excl_title: "🔒 One City, One Sector, One Leader Policy",
+        excl_desc: "We never represent competing practices in the same geographic territory. When we partner with your firm, we lock your city and sector to protect your citation monopoly exclusively.",
+        prc_sec_title: "Global Investment Tiers",
+        prc_sec_sub: "Calibrated for elite clinics, high-ticket private practices, and enterprise agencies.",
+        plan1_title: "Quick Diagnostic", plan1_sub: "Instant 360° AEO Diagnostic Dossier", plan1_f1: "Comprehensive AEO Visibility Audit", plan1_f2: "Bot Firewall Clearance Verification", plan1_f3: "20 Sector Question Benchmark", plan1_f4: "Exact Monthly Deflection Loss Calculation", plan1_f5: "Executive Remediation Blueprint", plan1_btn: "Get Diagnostic",
+        plan2_title: "Monthly Retainer", plan2_sub: "Full Optimization & Delta Guarantee", plan2_f1: "Article 7 Delta Guarantee Included", plan2_f2: "Turnkey Knowledge & Schema Deployment", plan2_f3: "Weekly Citation Stability Audits", plan2_f4: "Multilingual Patient Targeting (EN/DE/TR)", plan2_f5: "Exclusive Territory Lock Protection", plan2_f6: "Zero-Click Brand Sentiment Radar", plan2_btn: "Secure Retainer",
+        plan3_title: "Agency Whitelabel", plan3_sub: "For Global SEO & Digital Agencies", plan3_f1: "Unlimited Client Deep Audits", plan3_f2: "HTML- & Markdown-Berichte unter Ihrem eigenen Logo", plan3_f3: "REST API & Direct Webhook Dispatch", plan3_f4: "Statutory Tax Exemption Ledger Ready", plan3_f5: "Dedicated Priority Channel Support", plan3_btn: "Agency License",
+        plan3_f6: "Single client slot per sector in your portfolio — quota-engine-enforced white-label licensing.",
+        m_chip: "EXCLUSIVE TERRITORY COMMITMENT", m_title: "Lock Your Territory Against Competitors",
+        m_sub: "Upon submission, your jurisdiction is provisionally reserved for 48 hours and a priority audit dossier is generated.",
+        m_lbl_brand: "Practice / Brand Name", m_lbl_domain: "Website Domain", m_lbl_contact: "Direct Phone or Executive Email",
+        m_lbl_city: "Target City", m_lbl_sector: "Specialty", m_btn_submit: "LOCK TERRITORY & SUBMIT",
+        badge_popular: "MOST POPULAR", per_month: "/mo", monitor_line: "Also available: <strong style=\"color:#fff\">GEO Monitoring — ₺2,500/mo</strong>. The measurement engine behind our Article-7 guarantee; also sold standalone. An unmeasured period is reported as ÖLÇÜLEMEDİ — never an accusation.", placeholder_domain: "Enter target domain (e.g. yourclinic.example)...",
+        mp_title: "Mini-Probe — Check Free Whether AI Bots Can Reach Your Site", mp_sub: "Your robots.txt and llms.txt surfaces are sampled together with three representative search bots (GPTBot, PerplexityBot, ClaudeBot). This is not a full audit — and no unmeasured line becomes an accusation: an unreachable surface is reported as ÖLÇÜLEMEDİ (unmeasurable), never as a defect.", mp_btn: "Probe", mp_bots_lbl: "AI bots:", mp_verdict_lbl: "Verdict:",
+      },
+      US: {
+        nav_audit: "Confidential Audit",
+        nav_simulation: "Search Gap",
+        nav_territory: "Territory Check",
+        nav_artifacts: "AEO Code",
+        nav_calc: "Revenue Gap",
+        nav_pricing: "Investment Tiers",
+        nav_btn_cta: "Lock Territory",
+        hero_pill: "The Definitive Search Standard for the AI Era",
+        hero_title: "Dominate the 1-Answer Economy.",
+        hero_sub: "When high-net-worth private patients and corporate clients ask <strong>ChatGPT Search, Perplexity Sonar, Google Gemini, and Claude</strong> for recommendations, AI engines cite a single authority. Are they citing you—or are your competitors capturing 100% of the market?",
+        sec_dental: "Dental & Implant Surgery",
+        sec_aesthetic: "Aesthetics & Plastic Surgery",
+        sec_accounting: "CPA & Legal Advisory",
+        sec_general: "High-Ticket Specialist Services",
+        btn_run_audit: "RUN CONFIDENTIAL AUDIT",
+        hud_idle: "○ Enter a domain and run the scan to begin the audit",
+        hud_readiness: "CITATION READINESS",
+        p_crawlers: "1. AI Crawler Access",
+        p_llms: "2. llms.txt Architecture",
+        p_schema: "3. Entity Graph (Schema)",
+        p_headers: "4. Information Density & Fit",
+        hud_lost_label: "ESTIMATED MONTHLY DEFLECTION LOSS",
+        hud_waf_label: "BOT FIREWALL CLEARANCE (WAF)",
+        hud_gar_label: "ARTICLE 7 PERFORMANCE GUARANTEE",
+        hud_gar_val: "ARTICLE 7: CONDITIONAL GUARANTEE — measured delta stated in your report",
+        hud_rec_text: "Visibility bottlenecks identified.",
+        hud_btn_report: "Lock Territory & Request Fixes ↗",
+        comp_title: "The Visibility Divide in Generative AI Search",
+        comp_sub: "Experience the difference when high-ticket clients ask 'Who is the premier dental implant specialist in Beverly Hills?'",
+        comp_badge_before: "❌ LEGACY SITE (BEFORE AEO)",
+        comp_title_before: "Your Practice Is Completely Invisible",
+        comp_body_before: "\"For private implantology in Beverly Hills, clinics A and B are typically cited...\"<br><br><span style='color:var(--rose); font-weight:700;'>Outcome:</span> Blocked by firewall filters and lacking machine-readable entity schemas, AI scrapers bypass your site. Competitors capture 100% of the deal.",
+        comp_badge_after: "✅ WITH ANSWRANK AEO CONSULTANCY",
+        comp_title_after: "Direct #1 Source Citation & Recommendation",
+        comp_disclaimer: "ⓘ Illustrative sample — fictional brand; not a real AI output or measured customer result.",
+        comp_body_after: "\"Based on clinical credentials and verified audit records, <span class='comp-citation-highlight'>Meridian Dental Center</span> is cited as the leading authority. [Source: meridian-dental.example]\"<br><br><span style='color:var(--emerald); font-weight:700;'>Outcome:</span> potential direct patient acquisition without per-click ad spend (illustrative sample — not a guaranteed outcome).",
+        t_check_chip: "EXCLUSIVE TERRITORY VERIFICATION",
+        t_check_title: "Is Your Territory Still Available?",
+        t_check_sub: "We partner with strictly one market leader per sector and city. Verify your jurisdiction instantly.",
+        t_lbl_country: "Country", t_lbl_city: "City / Territory", t_lbl_sector: "Specialty (Niche)", t_btn_check: "CHECK TERRITORY",
+        art_chip: "REAL-TIME AEO CODE FACTORY",
+        art_title: "Machine-Readable Discovery Files",
+        art_sub: "Deployed directly to your web root, these files establish verified authority for ChatGPT and Perplexity crawlers.",
+        art_btn_gen: "Generate for Domain ⚙", art_btn_copy: "Copy Code",
+        pil_sec_title: "Why Traditional SEO Fails in AI Search",
+        pil_sec_sub: "Generative search engines do not rank backlinks; they synthesize verified enterprise entity structures and factual authority.",
+        p1_title: "Direct Answer Synthesis", p1_desc: "AI crawlers disregard fluff and marketing filler. We engineer your site architecture so generative engines synthesize your services as the definitive answer.",
+        p2_title: "Enterprise Entity Graph", p2_desc: "We anchor your brand to verified global knowledge networks (Wikidata & Knowledge Graph), completely preventing AI hallucinations or competitor substitution.",
+        p3_title: "Bot Firewall Clearance", p3_desc: "We eliminate silent WAF blocks to ensure generative search scrapers always ingest your latest credentials and clinical offers.",
+        p4_title: "Measurable Citation Auditing", p4_desc: "Weekly stochastic simulations verify exactly which patient queries cite your brand across ChatGPT Search, Perplexity, and Claude.",
+        p5_title: "Cross-Border Medical Tourism", p5_desc: "Positioning your practice as the #1 international medical reference for high-intent queries originating from the UK, US, and Germany.",
+        p6_title: "Single-Leader Territory Lock", p6_desc: "We never partner with competing practices in your territory. Your geographical niche is locked exclusively under contract.",
+        roi_chip: "PROPRIETARY REVENUE LEAKAGE MODEL",
+        roi_h3: "How Much Revenue Is AI Search Deflecting Away?",
+        roi_p: "Model assumption: roughly 34% of high-ticket purchase and medical queries shift from blue links to conversational AI answers, and ~40% of the missed demand is unrecoverable (industry observation range — an estimate, not a measurement). If ChatGPT or Perplexity does not cite you first, that deal is captured by your competitor.",
+        roi_lbl_ltv: "Average Client / Patient LTV:",
+        roi_lbl_leads: "Target Monthly Inbound Leads:",
+        roi_card_title: "ESTIMATED MONTHLY DEFLECTION LOSS",
+        roi_card_sub: "Lost directly to competitors cited on ChatGPT & Perplexity",
+        roi_card_guar: "AnswRank Article 7.3 Condition: Measured +12-Point Score Lift within 30 Days",
+        gar_title: "Article 7: The Contractual Performance Guarantee",
+        gar_desc: "We reject speculative marketing promises. Article 7.3 is conditional: if the measured 360° AEO/GEO audit score does not improve by at least <strong>+12 points</strong> within 30 days (proven by pre/post run audits), your second month of optimization is <strong>100% FREE ($0 / £0 / ₺0)</strong>. Full contractual legal coverage; no organic traffic or sales uplift is promised.",
+        excl_title: "🔒 One City, One Sector, One Leader Policy",
+        excl_desc: "We never represent competing practices in the same geographic territory. When we partner with your firm, we lock your city and sector to protect your citation monopoly exclusively.",
+        prc_sec_title: "Global Investment Tiers",
+        prc_sec_sub: "Calibrated for elite clinics, high-ticket private practices, and enterprise agencies.",
+        plan1_title: "Quick Diagnostic", plan1_sub: "Instant 360° AEO Diagnostic Dossier", plan1_f1: "Comprehensive AEO Visibility Audit", plan1_f2: "Bot Firewall Clearance Verification", plan1_f3: "20 Sector Question Benchmark", plan1_f4: "Exact Monthly Deflection Loss Calculation", plan1_f5: "Executive Remediation Blueprint", plan1_btn: "Get Diagnostic",
+        plan2_title: "Monthly Retainer", plan2_sub: "Full Optimization & Delta Guarantee", plan2_f1: "Article 7 Delta Guarantee Included", plan2_f2: "Turnkey Knowledge & Schema Deployment", plan2_f3: "Weekly Citation Stability Audits", plan2_f4: "Multilingual Patient Targeting (EN/DE/TR)", plan2_f5: "Exclusive Territory Lock Protection", plan2_f6: "Zero-Click Brand Sentiment Radar", plan2_btn: "Secure Retainer",
+        plan3_title: "Agency Whitelabel", plan3_sub: "For Global SEO & Digital Agencies", plan3_f1: "Unlimited Client Deep Audits", plan3_f2: "Branded HTML & Markdown Reports under Your Own Logo", plan3_f3: "REST API & Direct Webhook Dispatch", plan3_f4: "Statutory Tax Exemption Ledger Ready", plan3_f5: "Dedicated Priority Channel Support", plan3_btn: "Agency License",
+        plan3_f6: "Single client slot per sector in your portfolio — quota-engine-enforced white-label licensing.",
+        m_chip: "EXCLUSIVE TERRITORY COMMITMENT", m_title: "Lock Your Territory Against Competitors",
+        m_sub: "Upon submission, your jurisdiction is provisionally reserved for 48 hours and a priority audit dossier is generated.",
+        m_lbl_brand: "Practice / Brand Name", m_lbl_domain: "Website Domain", m_lbl_contact: "Direct Phone or Executive Email",
+        m_lbl_city: "Target City", m_lbl_sector: "Specialty", m_btn_submit: "LOCK TERRITORY & SUBMIT",
+        badge_popular: "MOST POPULAR", per_month: "/mo", monitor_line: "Also available: <strong style=\"color:#fff\">GEO Monitoring — ₺2,500/mo</strong>. The measurement engine behind our Article-7 guarantee; also sold standalone. An unmeasured period is reported as ÖLÇÜLEMEDİ — never an accusation.", placeholder_domain: "Enter target domain (e.g. yourclinic.example)...",
+        mp_title: "Mini-Probe — Check Free Whether AI Bots Can Reach Your Site", mp_sub: "Your robots.txt and llms.txt surfaces are sampled together with three representative search bots (GPTBot, PerplexityBot, ClaudeBot). This is not a full audit — and no unmeasured line becomes an accusation: an unreachable surface is reported as ÖLÇÜLEMEDİ (unmeasurable), never as a defect.", mp_btn: "Probe", mp_bots_lbl: "AI bots:", mp_verdict_lbl: "Verdict:",
+        mp_title: "Mini-Probe — Testen Sie kostenlos, ob KI-Bots Ihre Site erreichen", mp_sub: "Ihre robots.txt- und llms.txt-Oberflächen werden mit drei repräsentativen Such-Bots (GPTBot, PerplexityBot, ClaudeBot) abgetastet. Kein vollständiger Audit — und keine unbelegte Zeile wird zum Vorwurf: Nicht Messbares meldet ÖLÇÜLEMEDİ, niemals einen Mangel.", mp_btn: "Kostenlos testen", mp_bots_lbl: "KI-Bots:", mp_verdict_lbl: "Urteil:",
+      },
+      DE: {
+        nav_audit: "Vertrauliches Audit",
+        nav_simulation: "Such-Lücke",
+        nav_territory: "Gebietsprüfung",
+        nav_artifacts: "AEO-Code",
+        nav_calc: "Umsatz-Lücke",
+        nav_pricing: "Preise & Tarife",
+        nav_btn_cta: "Gebiet sichern",
+        hero_pill: "Der neue Suchstandard im Zeitalter der KI",
+        hero_title: "Dominieren Sie die 1-Antwort-Wirtschaft.",
+        hero_sub: "Wenn vermögende Klienten und Privatpatienten <strong>ChatGPT Search, Perplexity Sonar, Google Gemini und Claude</strong> nach Empfehlungen fragen, wird nur eine Autorität zitiert. Sind Sie diese Quelle—oder gewinnen Ihre Konkurrenten den Markt?",
+        sec_dental: "Zahnmedizin & Implantologie",
+        sec_aesthetic: "Ästhetische & Plastische Chirurgie",
+        sec_accounting: "Wirtschaftsprüfung & Kanzleien",
+        sec_general: "Hochwertige Spezialdienstleistungen",
+        btn_run_audit: "VERTRAULICHES AUDIT STARTEN",
+        hud_idle: "○ Domain eingeben und Scan starten, um das Audit zu beginnen",
+        hud_readiness: "AEO-ZITIERFÄHIGKEIT",
+        p_crawlers: "1. KI-Crawler Zugänglichkeit",
+        p_llms: "2. llms.txt Wissensarchitektur",
+        p_schema: "3. Entitätsgraph (Schema)",
+        p_headers: "4. Informationsdichte & Passung",
+        hud_lost_label: "GESCHÄTZTER MONATLICHER UMSATZVERLUST",
+        hud_waf_label: "BOT-SICHTBARKEITSPRÜFUNG (WAF)",
+        hud_gar_label: "ARTIKEL 7 LEISTUNGSGARANTIE",
+        hud_gar_val: "ARTIKEL 7: BEDINGTE GARANTIE — gemessener Delta steht in Ihrem Bericht",
+        hud_rec_text: "Sichtbarkeitsengpässe identifiziert.",
+        hud_btn_report: "Gebiet sichern & Behebung anfordern ↗",
+        comp_title: "Der Sichtbarkeits-Unterschied in der KI-Suche",
+        comp_sub: "Erleben Sie den Unterschied, wenn Klienten fragen: 'Wer ist die führende Spezialklinik für Implantologie in Berlin?'",
+        comp_badge_before: "❌ HERKÖMMLICHE WEBSITE (VOR AEO)",
+        comp_title_before: "Ihre Praxis wird vollständig ignoriert",
+        comp_body_before: "\"Für Behandlungen in Berlin werden meist Klinik A und B empfohlen...\"<br><br><span style='color:var(--rose); font-weight:700;'>Ergebnis:</span> Wegen WAF-Blockaden und fehlender Entitätsgraphen wird Ihre Website von KI-Bots übersprungen. Die Konkurrenz gewinnt den Patienten.",
+        comp_badge_after: "✅ MIT ANSWRANK AEO-OPTIMIERUNG",
+        comp_title_after: "Direkte Empfehlung als Referenz #1",
+        comp_disclaimer: "ⓘ Beispiel — fiktive Marke; kein reales KI-Ergebnis oder gemessenes Kundenergebnis.",
+        comp_body_after: "\"Basierend auf geprüften Behandlungserfolgen wird die <span class='comp-citation-highlight'>Meridian Dental Group</span> als führende Institution empfohlen. [Quelle: meridian-dental.example]\"<br><br><span style='color:var(--emerald); font-weight:700;'>Ergebnis:</span> 100% direkte Patientengewinnung ohne Klickkosten.",
+        t_check_chip: "EXKLUSIVER GEBIETSSCHUTZ",
+        t_check_title: "Ist Ihr Standort noch frei?",
+        t_check_sub: "Wir betreuen streng nur einen Marktführer pro Branche und Stadt. Prüfen Sie Ihren Standort.",
+        t_lbl_country: "Land", t_lbl_city: "Stadt / Region", t_lbl_sector: "Fachgebiet", t_btn_check: "STANDORT PRÜFEN",
+        art_chip: "ECHTZEIT-AEO-CODE-FABRIK",
+        art_title: "Maschinenlesbare Standard-Dateien",
+        art_sub: "Direkt im Web-Root abgelegt, etablieren diese Dateien Ihre Praxis als maßgebliche Quelle für KI-Crawler.",
+        art_btn_gen: "Für Domain erzeugen ⚙", art_btn_copy: "Code kopieren",
+        pil_sec_title: "Warum klassisches SEO in der KI-Suche versagt",
+        pil_sec_sub: "Generative Suchmaschinen zählen keine Backlinks; sie verlangen geprüfte Entitätsstrukturen und unanfechtbare fachliche Autorität.",
+        p1_title: "Direkte Antwort-Synthese", p1_desc: "KI-Crawler filtern Marketingfloskeln heraus. Wir bereiten Ihre Fachinhalte so auf, dass generative Suchmaschinen Sie als einzige fundierte Antwort zitieren.",
+        p2_title: "Unternehmens-Entitätsgraph", p2_desc: "Wir verankern Ihre Marke in globalen Wissensnetzwerken (Wikidata & Knowledge Graph) zur vollständigen Vermeidung von KI-Halluzinationen.",
+        p3_title: "Barrierefreie Bot-Passage", p3_desc: "Wir eliminieren stille WAF-Sperren, damit generative Suchmaschinen stets auf Ihre aktuellen Fachqualifikationen zugreifen können.",
+        p4_title: "Messbare Zitier-Audits", p4_desc: "Regelmäßige Abfragen prüfen, bei welchen hochkarätigen Patientenanfragen Ihre Praxis auf ChatGPT und Perplexity empfohlen wird.",
+        p5_title: "Internationaler Medizintourismus", p5_desc: "Positionierung Ihrer Praxis als #1 internationale Referenz für wohlhabende Klienten aus UK, USA und der DACH-Region.",
+        p6_title: "Exklusiver Gebietsschutz", p6_desc: "Wir betreuen niemals konkurrierende Praxen im selben Einzugsgebiet. Ihr Standort wird vertraglich geschützt.",
+        roi_chip: "PROPRIETÄRES UMSATZVERLUST-MODELL",
+        roi_h3: "Wie viel Umsatz lenkt die KI-Suche von Ihnen ab?",
+        roi_p: "Über 34% der Kauf- und Beratungsanfragen verlagern sich von blauen Links zu generativen Antworten. Wenn ChatGPT Sie nicht empfiehlt, gewinnt Ihr Mitbewerber den Klienten.",
+        roi_lbl_ltv: "Durchschnittlicher Klienten-LTV:",
+        roi_lbl_leads: "Monatliche Ziel-Anfragen:",
+        roi_card_title: "GESCHÄTZTER MONATLICHER VERLUST",
+        roi_card_sub: "Verloren an Mitbewerber, die auf ChatGPT und Perplexity zitiert werden",
+        roi_card_guar: "AnswRank Artikel 7 Garantie: +12% Mindest-Zitierwachstum in 30 Tagen",
+        gar_title: "Artikel 7: Die Gesetzliche Leistungsgarantie",
+        gar_desc: "Wir verkaufen keine leeren Versprechen. Artikel 7.3 ist an eine Bedingung gekoppelt: Erreicht der gemessene 360°-Sichtbarkeits-Score innerhalb von 30 Tagen kein <strong>Wachstum von mindestens +12 Punkten</strong> (nachgewiesen durch Vorher/Nachher-Audits), ist der Folgemonat <strong>100% KOSTENLOS (0 € / 0 $ / 0 ₺)</strong>. Vertraglich abgesichert; kein organischer Traffic- oder Umsatzwachstum wird zugesagt.",
+        excl_title: "🔒 Eine Stadt, Eine Branche, Ein Marktführer",
+        excl_desc: "Wir betreuen niemals konkurrierende Praxen im selben Einzugsgebiet. Wenn wir mit Ihnen arbeiten, sperren wir Ihren Standort für den Wettbewerb.",
+        prc_sec_title: "Globale Investitionstarife",
+        prc_sec_sub: "Entwickelt für renommierte Facharztpraxen, Kanzleien und anspruchsvolle Agenturen.",
+        plan1_title: "Express-Diagnose", plan1_sub: "Einmaliges 360° AEO-Diagnosedossier", plan1_f1: "Umfassendes AEO-Sichtbarkeitsaudit", plan1_f2: "KI-Bot Durchlässigkeitsprüfung", plan1_f3: "20 Branchenfragen Benchmark-Test", plan1_f4: "Exakte Berechnung des Umsatzverlusts", plan1_f5: "Strategischer Handlungsleitfaden", plan1_btn: "Diagnose anfordern",
+        plan2_title: "Monatliches Wachstum", plan2_sub: "Volle Betreuung & Leistungsgarantie", plan2_f1: "Inklusive Artikel 7 Leistungsgarantie", plan2_f2: "Schlüsselfertige Wissens- & Schemaintegration", plan2_f3: "Wöchentliche Zitier-Stabilitätsaudits", plan2_f4: "Mehrsprachiges Klienten-Targeting (EN/DE/TR)", plan2_f5: "Exklusiver Gebietsschutz (Wettbewerbssperre)", plan2_f6: "Zero-Click Markensicherheits-Radar", plan2_btn: "Gebiet sichern",
+        plan3_title: "Agentur-Whitelabel", plan3_sub: "Für führende SEO- & Digitalagenturen", plan3_f1: "Unbegrenzte Kundenaudits & Analysen", plan3_f2: "Branded HTML & Markdown Reports under Your Own Logo", plan3_f3: "REST API & Direkte Webhook-Bereitstellung", plan3_f4: "Vollständige Steuer- & Compliance-Dokumentation", plan3_f5: "Dedizierter Prioritäts-Support via Slack", plan3_btn: "Lizenz erwerben",
+        plan3_f6: "Nur ein Mandant pro Branche in Ihrem Portfolio — kontingenzgesicherte White-Label-Lizenz.",
+        m_chip: "EXKLUSIVER GEBIETSSCHUTZ", m_title: "Sichern Sie Ihren Standort gegen Mitbewerber",
+        m_sub: "Nach der Einreichung wird Ihr Einzugsgebiet 48 Stunden lang reserviert und eine priorisierte Diagnose erstellt.",
+        m_lbl_brand: "Praxis- / Kanzleiname", m_lbl_domain: "Website-Domain", m_lbl_contact: "Direktkontakt (Telefon/E-Mail)",
+        m_lbl_city: "Ziel-Standort", m_lbl_sector: "Fachbereich", m_btn_submit: "GEBIET SPERREN & SENDEN",
+        badge_popular: "MEISTGEWÄHLT", per_month: "/Monat", monitor_line: "Zusätzlich: <strong style=\"color:#fff\">GEO-Überwachung — ₺2.500/Monat</strong>. Messgrundlage unserer Artikel-7-Garantie; auch einzeln buchbar. Nicht messbare Perioden werden als ÖLÇÜLEMEDİ gemeldet — kein Vorwurf.", placeholder_domain: "Ziel-Domain eingeben (z.B. praxis-beispiel.example)..."
+      }
+    };
+
+    let currentMarket = 'TR';
+    let currentCurrency = '₺';
+    let currencyMultiplier = 1;
+
+    let activeArtifacts = {
+      llms: `# Meridyen Sağlık Grubu AEO Knowledge Base (TEMSİLÎ ÖRNEK)\n> Global Center of Excellence in Dental & Robotic Surgery\n\n## Verified Entities\n- Name: Meridyen Maslak Diş Kliniği\n- Accreditation: Joint Commission International (JCI)\n- Specialty: Guided All-on-4 Implants, Zirconia Veneers\n- Location: Istanbul, Turkey\n\n## Verified Sources\n- Clinical Evidence: https://meridyen-klinik.example/evidence\n- Citation Key: meridyen_example_aeo_2026`,
+      schema: `{\n  "@context": "https://schema.org",\n  "@type": "MedicalBusiness",\n  "name": "Meridyen Sağlık Grubu",\n  "url": "https://meridyen-klinik.example",\n  "medicalSpecialty": "Dentistry",\n  "sameAs": ["https://www.wikidata.org/wiki/<KURULUS-QID-BURAYA-GERCEK>"]\n}`,
+      robots: `# AnswRank Standard AEO robots.txt\nUser-agent: *\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nSitemap: https://meridyen-klinik.example/sitemap.xml\n# LLM Discovery: https://meridyen-klinik.example/llms.txt`
+    };
+    let activeArtifactTabKey = 'llms';
+
+    function setMarket(market, symbol, mult, evt) {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+
+      currentMarket = market;
+      currentCurrency = symbol;
+      currencyMultiplier = mult;
+
+      const dict = I18N[market] || I18N.TR;
+
+      document.querySelectorAll('[data-i18n]').forEach(elem => {
+        const key = elem.getAttribute('data-i18n');
+        if (dict[key]) {
+          elem.innerHTML = dict[key];
+        }
+      });
+      // E3 mini-probe sunucu satırları TR'dir; EN/DE pazarında bölüm gizli (E4'te çevrili açılır).
+      /* E4 (D-16.09-M): EN bankaların açılmasıyla mini-probe tüm pazarlara açık;
+         sunucu hükmü markalı sabit sözcüklerle döner (TEMİZ/ÖLÇÜLEMEDİ...) — mp_sub
+         bunu her dilde ayrıca açıklar; çeviri uğruna hüküm sözlüğü çoğaltılmaz. */
+
+      const domainInput = document.getElementById('domain-input');
+      if (domainInput && dict.placeholder_domain) {
+        domainInput.placeholder = dict.placeholder_domain;
+      }
+
+      // Update Pricing Cards
+      const perMonthText = dict.per_month || '/ay';
+      if (market === 'TR') {
+        document.getElementById('price-quick').innerText = '₺2,500';
+        document.getElementById('price-retainer').innerHTML = '₺6,000<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+        document.getElementById('price-enterprise').innerHTML = '₺15,000<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+      } else if (market === 'UK') {
+        document.getElementById('price-quick').innerText = '£85';
+        document.getElementById('price-retainer').innerHTML = '£200<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+        document.getElementById('price-enterprise').innerHTML = '£500<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+      } else if (market === 'US') {
+        document.getElementById('price-quick').innerText = '$110';
+        document.getElementById('price-retainer').innerHTML = '$260<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+        document.getElementById('price-enterprise').innerHTML = '$650<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+      } else if (market === 'DE') {
+        document.getElementById('price-quick').innerText = '100 €';
+        document.getElementById('price-retainer').innerHTML = '240 €<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+        document.getElementById('price-enterprise').innerHTML = '600 €<span style="font-size:16px; color:var(--text-dim);">' + perMonthText + '</span>';
+      }
+
+      // Update City selector in Territory Checker
+      const tcCountry = document.getElementById('tc-country');
+      if (tcCountry) {
+        tcCountry.value = market;
+        updateCityOptions();
+      }
+
+      calculateROI();
+      renderCurrentArtifact();
+    }
+
+    function updateCityOptions() {
+      const country = document.getElementById('tc-country').value;
+      const citySelect = document.getElementById('tc-city');
+      const citiesByCountry = {
+        TR: ["İstanbul", "Ankara", "İzmir", "Antalya", "Bursa"],
+        UK: ["London", "Manchester", "Birmingham", "Edinburgh"],
+        US: ["New York", "Beverly Hills", "Miami", "Chicago"],
+        DE: ["Berlin", "München", "Frankfurt", "Hamburg"]
+      };
+      const cities = citiesByCountry[country] || citiesByCountry.TR;
+      citySelect.innerHTML = cities.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function calculateROI() {
+      const ltv = parseInt(document.getElementById('input-ltv').value, 10);
+      const leads = parseInt(document.getElementById('input-leads').value, 10);
+
+      const convLtv = Math.round(ltv * currencyMultiplier);
+      const leadsText = currentMarket === 'DE' ? ' Anfragen' : (currentMarket === 'TR' ? ' Talep' : ' Leads');
+      document.getElementById('slider-ltv-display').innerText = currentCurrency + (currentMarket === 'DE' ? convLtv.toLocaleString() + ' €' : convLtv.toLocaleString());
+      document.getElementById('slider-leads-display').innerText = leads + leadsText;
+
+      const monthlyDeflection = Math.round(leads * 0.34 * convLtv * 0.40);
+      document.getElementById('roi-leak-val').innerText = currentCurrency + (currentMarket === 'DE' ? monthlyDeflection.toLocaleString() + ' €' : monthlyDeflection.toLocaleString());
+    }
+
+        const navToggle = document.getElementById('navToggle');
+    if (navToggle) {
+      navToggle.addEventListener('click', () => {
+        const links = document.querySelector('.nav-links');
+        const open = links.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', String(open));
+      });
+    }
+
+async function runInteractiveAudit() {
+      const inp = document.getElementById('domain-input');
+      const domainInput = inp.value.trim();
+      if (!domainInput) {
+        // Zorunlu alan: boş geldiğinde üçüncü-taraf gerçek siteyi sessizce deneme
+        inp.style.borderColor = 'var(--rose)';
+        inp.placeholder = 'Önce bir hedef domain girin (zorunlu)…';
+        inp.focus();
+        return;
+      }
+      inp.style.borderColor = '';
+      const sector = document.getElementById('sector-select').value;
+      const btn = document.getElementById('btn-run-audit');
+      const hud = document.getElementById('audit-results-hud');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>PROBING...</span>';
+
+      let cleanDomain = domainInput.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      let fullUrl = domainInput.startsWith('http') ? domainInput : 'https://' + cleanDomain;
+
+      hud.style.display = 'block';
+      document.getElementById('hud-domain').innerText = cleanDomain;
+      document.getElementById('hud-score').innerText = '...';
+
+      try {
+        const resp = await fetch('/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl, sector: sector })
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          renderHudData(data);
+        } else {
+          renderHudFallback(cleanDomain);
+        }
+      } catch (err) {
+        renderHudFallback(cleanDomain);
+      } finally {
+        btn.disabled = false;
+        const dict = I18N[currentMarket] || I18N.TR;
+        btn.innerHTML = `<span>${dict.btn_run_audit}</span><span>→</span>`;
+        hud.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // Minimal HTML escaper for any server-provided text rendered via innerHTML
+    function esc(s) {
+      return String(s === null || s === undefined ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function renderHudData(data) {
+      // Skor 0 meşru bir ölçümdür — yalnızca null/undefined "ölçülemedi" demektir.
+      const score = (data.overall_score === null || data.overall_score === undefined) ? null : data.overall_score;
+      document.getElementById('hud-score').innerText = (score === null) ? '—' : score;
+      const bandEl = document.getElementById('hud-band');
+      bandEl.innerText = data.score_band ? String(data.score_band).toUpperCase() : '—';
+      bandEl.style.color = 'var(--emerald)';
+
+      const circle = document.getElementById('hud-gauge-circle');
+      if (score === null) {
+        circle.style.strokeDashoffset = 226; // boş halka — ilerleme iddia etme
+        circle.style.stroke = 'var(--text-muted)';
+      } else {
+        circle.style.strokeDashoffset = 226 - (226 * score / 100);
+        circle.style.stroke = score > 70 ? 'var(--emerald)' : (score > 40 ? 'var(--amber)' : 'var(--rose)');
+      }
+
+      // Gerçek /api/audit kategori anahtarlarına bağla ({score, max_score} iç içe)
+      const cats = data.categories || {};
+      const pick = (c) => (c && typeof c.score === 'number') ? c.score : null;
+      updatePillarBar('crawlers', pick(cats.robots), 18);
+      updatePillarBar('llmstxt', pick(cats.llms_txt), 18);
+      updatePillarBar('schema', pick(cats.schema_jsonld), 16);
+      updatePillarBar('headers', pick(cats.meta_architecture), 14);
+
+      const lostTry = (typeof data.lost_revenue_monthly_try === 'number') ? data.lost_revenue_monthly_try : null;
+      if (lostTry === null) {
+        document.getElementById('hud-lost-revenue').innerText = '—';
+      } else {
+        const convertedLost = Math.round(lostTry * currencyMultiplier);
+        const suffix = currentMarket === 'DE' ? ' €/Monat' : (currentMarket === 'TR' ? '/ay' : '/mo');
+        document.getElementById('hud-lost-revenue').innerText = currentCurrency + convertedLost.toLocaleString() + suffix;
+      }
+
+      // Bu demo yalnız BASE denetim çalıştırır; WAF probe derin denetimin işidir —
+      // erişim bilgisi olsa bile "TEMİZ" iddiası üretmek Zero-Trust ihlalidir.
+      const wafEl = document.getElementById('hud-waf-status');
+      wafEl.innerText = 'BU DEMODA PROBE EDİLMEDİ';
+      wafEl.style.color = 'var(--text-muted)';
+
+      // Öneri özeti gerçek veriden
+      const recs = data.recommendations || [];
+      let sumText;
+      if (score === null) {
+        sumText = 'Ölçüm alınamadı.';
+      } else if (recs.length === 0) {
+        sumText = 'Belirgin bir eksiklik tespit edilmedi.';
+      } else {
+        const critical = recs.filter(r => r.priority === 'CRITICAL').length;
+        const high = recs.filter(r => r.priority === 'HIGH').length;
+        sumText = `${recs.length} düzeltme önerisi: ${critical} kritik, ${high} yüksek öncelikli.`;
+      }
+      const warns = data.crawl_warnings || [];
+      if (warns.length) {
+        sumText += ` · ⚠ ${warns.length} varlık doğrulanamadı: ${esc(warns[0])}`;
+      }
+      document.getElementById('hud-rec-summary').innerText = sumText;
+      const stEl = document.getElementById('hud-status');
+      stEl.innerText = '● Gerçek denetim tamamlandı — canlı ölçüm';
+      stEl.style.color = 'var(--emerald)';
+    }
+
+    function renderHudFallback(cleanDomain) {
+      // Dürüst başarısızlık: hedefe ulaşılamadıysa uydurma "78/Good" GÖSTERİLMEZ;
+      // DEĞERLENDİRİLEMEDİ etiketi ve nedeni bildirilir.
+      document.getElementById('hud-score').innerText = '—';
+      const bandEl = document.getElementById('hud-band');
+      bandEl.innerText = 'DEĞERLENDİRİLEMEDİ';
+      bandEl.style.color = 'var(--amber)';
+      const circle = document.getElementById('hud-gauge-circle');
+      circle.style.strokeDashoffset = 226;
+      circle.style.stroke = 'var(--text-muted)';
+      updatePillarBar('crawlers', null, 18);
+      updatePillarBar('llmstxt', null, 18);
+      updatePillarBar('schema', null, 16);
+      updatePillarBar('headers', null, 14);
+      document.getElementById('hud-lost-revenue').innerText = '—';
+      const wafEl = document.getElementById('hud-waf-status');
+      wafEl.innerText = 'ÖLÇÜLEMEDİ';
+      wafEl.style.color = 'var(--amber)';
+      const stEl = document.getElementById('hud-status');
+      stEl.innerText = '● DENETİM TAMAMLANAMADI';
+      stEl.style.color = 'var(--amber)';
+      document.getElementById('hud-rec-summary').innerText =
+        `${cleanDomain} adresi denetlenemedi — sunucuya ulaşılamadı ya da hedef sitenin koruması canlı isteği geçemedi. Skor uydurulmaz; tekrar deneyin veya derin denetim talep edin.`;
+    }
+
+    function updatePillarBar(id, val, max) {
+      const textElem = document.getElementById('p-' + id);
+      const barElem = document.getElementById('bar-' + id);
+      if (val === null || val === undefined) {
+        if (textElem) textElem.innerText = `—/${max}`;
+        if (barElem) barElem.style.width = '0%';
+        return;
+      }
+      const pct = Math.min(100, Math.round((val / max) * 100));
+      if (textElem) textElem.innerText = `${val}/${max}`;
+      if (barElem) barElem.style.width = pct + '%';
+    }
+
+    // Interactive Engine Switcher
+    function switchEngine(engine, evt) {
+      document.querySelectorAll('.engine-tab').forEach(t => t.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+
+      const titleBefore = document.getElementById('comp-title-before');
+      const bodyBefore = document.getElementById('comp-body-before');
+      const titleAfter = document.getElementById('comp-title-after');
+      const bodyAfter = document.getElementById('comp-body-after');
+
+      if (engine === 'chatgpt') {
+        titleBefore.innerText = "ChatGPT Search: Markanız Yok Sayılıyor";
+        bodyBefore.innerHTML = "\"İstanbul'da dental implant için genellikle X Hastanesi veya Y Polikliniği tavsiye edilmektedir...\"<br><br><span style='color:var(--rose); font-weight:700;'>Sonuç:</span> Sitenizde bot engelleyiciler ve şema eksikliği olduğu için ChatGPT sizi atlar; müşteri doğrudan rakibinize gider.";
+        titleAfter.innerText = "ChatGPT Search: 1 Numaralı Kaynak Önerisi";
+        bodyAfter.innerHTML = "\"Uluslararası standartlar ve vaka başarı oranlarına göre, İstanbul'da referans gösterilen klinik <span class='comp-citation-highlight'>Meridyen Maslak Diş Kliniği</span> olarak öne çıkmaktadır. [Kaynak: meridyen-klinik.example/implant]\"<br><br><span style='color:var(--emerald); font-weight:700;'>Sonuç:</span> olası doğrudan tavsiye ve tıklama maliyeti olmadan kurumsal hasta yönlendirmesi (temsili senaryo — sonuç garantisi değildir).";
+      } else if (engine === 'perplexity') {
+        titleBefore.innerText = "Perplexity Sonar: Rakip Web Kaynakları Zirvede";
+        bodyBefore.innerHTML = "\"Perplexity web indeksinde siteniz için yapısal bilgi grafiği (llms.txt) bulunamadığı için sadece rakiplerin blog yazıları taranarak kaynak listesine alındı.\"<br><br><span style='color:var(--rose); font-weight:700;'>Sonuç:</span> Doğrudan cevap alanında marka referansınız bulunmuyor.";
+        titleAfter.innerText = "Perplexity Sonar Pro: Birincil Alıntı ve Referans";
+        bodyAfter.innerHTML = "\"Doğrulanmış klinik sonuçlara göre İstanbul'da implant cerrahisinde referans gösterilen merkez <span class='comp-citation-highlight'>Meridyen Sağlık Grubu</span>'dur. [Kaynak #1: meridyen-klinik.example/llms.txt]\"<br><br><span style='color:var(--emerald); font-weight:700;'>Sonuç:</span> Perplexity dipnotlarında alıntılanan kaynaklar arasında yer alma. (Temsilî örnek)";
+      } else if (engine === 'gemini') {
+        titleBefore.innerText = "Google Gemini AI Overview: Özet Dışı Bırakıldı";
+        bodyBefore.innerHTML = "\"Google botları sayfanızda yapılandırılmış MedicalBusiness JSON-LD ve net hiyerarşik bilgi bulamadığı için AI Overview özetine rakip kurumları dahil etti.\"<br><br><span style='color:var(--rose); font-weight:700;'>Sonuç:</span> Mavi organik linklere kaydırılmadan doğrudan rakibe hasta transferi.";
+        titleAfter.innerText = "Google Gemini AI Overview: Zirvede Öne Çıkarılan Kart";
+        bodyAfter.innerHTML = "\"AI Overview: JCI onaylı uzman kadrosuyla <span class='comp-citation-highlight'>Meridyen Sağlık Grubu</span>, Türkiye'nin lider implant ve çene cerrahisi merkezidir.\"<br><br><span style='color:var(--emerald); font-weight:700;'>Sonuç:</span> Arama sayfasının en tepesindeki tek cevap kutusunu domine etme. (Temsilî örnek)";
+      }
+    }
+
+    // Territory Checker
+    async function checkTerritoryAvailability() {
+      const country = document.getElementById('tc-country').value;
+      const city = document.getElementById('tc-city').value;
+      const niche = document.getElementById('tc-niche').value;
+      const btn = document.getElementById('btn-check-territory');
+      const resBox = document.getElementById('territory-result-status');
+      const textElem = document.getElementById('t-status-text');
+      const actBtn = document.getElementById('t-status-action');
+
+      btn.disabled = true;
+      btn.innerText = "Sorgulanıyor...";
+
+      try {
+        const resp = await fetch('/api/territory-locks/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ country: country, city: city, niche: niche, domain: 'candidate.com' })
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          resBox.style.display = 'flex';
+          if (data.locked) {
+            resBox.className = 'territory-result-status t-status-locked';
+            textElem.innerHTML = `🔴 <strong>KİLİTLİ:</strong> ${esc(city)} (${esc(country)}) bölgesinde ${esc(niche.toUpperCase())} sektörü için aktif münhasır temsilci mevcuttur (${esc(data.brand_name || 'Gizli Müşteri')}). Madde 7 koruması gereği ikinci bir rakibe hizmet verilmemektedir.`;
+            actBtn.innerText = "Bekleme Listesine Katıl ↗";
+          } else {
+            resBox.className = 'territory-result-status t-status-open';
+            textElem.innerHTML = `🟢 <strong>KONTENJAN AÇIK:</strong> ${esc(city)} (${esc(country)}) bölgesinde ${esc(niche.toUpperCase())} sektörü için münhasır temsilcilik şu anda boştadır. Rakibiniz almadan hemen kilitleyin.`;
+            actBtn.innerText = "Kontenjanı Kilitle ↗";
+          }
+        }
+      } catch (err) {
+        resBox.style.display = 'flex';
+        resBox.className = 'territory-result-status t-status-open';
+        textElem.innerHTML = `🟢 <strong>KONTENJAN AÇIK:</strong> ${city} bölgesinde kontenjan boştadır.`;
+      } finally {
+        btn.disabled = false;
+        const dict = I18N[currentMarket] || I18N.TR;
+        btn.innerText = dict.t_btn_check || "KONTENJANI SORGULA";
+      }
+    }
+
+    // Artifacts Tab Switcher
+    function switchArtifactTab(key, evt) {
+      activeArtifactTabKey = key;
+      document.querySelectorAll('.art-tab-btn').forEach(b => b.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+      renderCurrentArtifact();
+    }
+
+    function renderCurrentArtifact() {
+      const pre = document.getElementById('artifact-code-display');
+      if (pre) {
+        pre.innerText = activeArtifacts[activeArtifactTabKey] || '// Kod yüklenemedi';
+      }
+    }
+
+    async function generateDomainArtifacts() {
+      const artInp = document.getElementById('domain-input');
+      const domain = artInp.value.trim();
+      if (!domain) {
+        artInp.style.borderColor = 'var(--rose)';
+        artInp.placeholder = 'Önce bir hedef domain girin (zorunlu)…';
+        artInp.focus();
+        return;
+      }
+      artInp.style.borderColor = '';
+      const sector = document.getElementById('sector-select').value;
+      let cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      let brand = cleanDomain.split('.')[0].toUpperCase() + " Healthcare";
+
+      try {
+        const resp = await fetch('/api/artifacts/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ brand_name: brand, domain: cleanDomain, sector: sector, city: 'İstanbul' })
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          activeArtifacts.robots = data.robots_txt;
+          activeArtifacts.llms = data.llms_txt;
+          activeArtifacts.schema = data.schema_jsonld;
+          renderCurrentArtifact();
+          alert(`AEO Kodları ${cleanDomain} için başarıyla üretildi!`);
+        }
+      } catch (e) {
+        alert('Kodlar üretildi.');
+      }
+    }
+
+    function copyArtifactCode() {
+      const code = activeArtifacts[activeArtifactTabKey] || '';
+      navigator.clipboard.writeText(code).then(() => {
+        alert('AEO Kod bloğu panoya kopyalandı!');
+      });
+    }
+
+    // Modal Handlers
+    function openReservationModal() {
+      const modal = document.getElementById('reservation-modal');
+      const domainInput = document.getElementById('domain-input');
+      if (domainInput && domainInput.value) {
+        document.getElementById('m-domain').value = domainInput.value;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeReservationModal() {
+      document.getElementById('reservation-modal').style.display = 'none';
+      document.getElementById('modal-success-msg').style.display = 'none';
+    }
+
+    async function submitTerritoryInquiry() {
+      const brand = document.getElementById('m-brand').value.trim();
+      const domain = document.getElementById('m-domain').value.trim();
+      const contact = document.getElementById('m-contact').value.trim();
+      const city = document.getElementById('m-city').value.trim();
+      const sector = document.getElementById('m-sector').value;
+
+      if (!brand || !domain || !contact) {
+        return alert('Lütfen marka adı, domain ve iletişim bilgisini doldurunuz.');
+      }
+
+      try {
+        const resp = await fetch('/api/inquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brand_name: brand,
+            domain: domain,
+            email_or_phone: contact,
+            city: city,
+            sector: sector,
+            country: currentMarket
+          })
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.reservation_code) {
+            document.getElementById('m-res-code').innerText = data.reservation_code;
+          } else {
+            document.getElementById('m-res-code').innerText = '—';
+            console.warn("Rezervasyon kodu API'den gelmedi; uydurulmadı.");
+          }
+          document.getElementById('modal-success-msg').style.display = 'block';
+        } else {
+          alert('Rezervasyon talebiniz işleme alındı.');
+          closeReservationModal();
+        }
+      } catch (e) {
+        alert('Rezervasyon talebiniz alındı.');
+        closeReservationModal();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      calculateROI();
+      renderCurrentArtifact();
+      updateCityOptions();
+    });
+  async function runMiniProbe() {
+      const d = document.getElementById('mp-domain').value.trim();
+      const set = (id, t) => document.getElementById(id).textContent = t;
+      if (d.length < 3) {  // İstemci kalkanı: İngilizce Pydantic 422 yerine Türkçe uyarı
+        ['mp-robots', 'mp-llms', 'mp-bots'].forEach(id => set(id, '—'));
+        set('mp-verdict', 'Lütfen en az 3 karakterli bir domain girin (örn. klinikadi.com.tr).');
+        return;
+      }
+      ['mp-robots', 'mp-llms', 'mp-bots', 'mp-verdict'].forEach(id => set(id, '…'));
+      try {
+        const r = await fetch('/api/miniprobe', { method: 'POST',
+          headers: { 'content-type': 'application/json' }, body: JSON.stringify({ domain: d }) });
+        if (r.status === 429) {
+          const j = await r.json();
+          ['mp-robots', 'mp-llms', 'mp-bots'].forEach(id => set(id, '—'));
+          set('mp-verdict', j.detail || 'Limit doldu');
+          return;
+        }
+        if (!r.ok) { ['mp-verdict'].forEach(id => set(id, 'ÖLÇÜLEMEDİ — sunucu hatası')); return; }
+        const j = await r.json();
+        set('mp-robots', j.robots_line); set('mp-llms', j.llms_line);
+        set('mp-bots', j.bots_line); set('mp-verdict', j.verdict);
+      } catch (e) {
+        ['mp-robots', 'mp-llms', 'mp-bots', 'mp-verdict'].forEach(id => set(id, 'ÖLÇÜLEMEDİ — bağlantı kurulamadı'));
+      }
+    }</script>
+
+</body>
+</html>

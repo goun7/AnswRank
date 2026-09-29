@@ -1,0 +1,59 @@
+# Smithery registry configuration — AnswRank MCP server.
+#
+# Publishing (Smithery CLI, Node.js 20+):
+#   smithery mcp publish ./answrank.mcpb -n <org>/answrank
+# or the URL path (Streamable HTTP + OAuth) via https://smithery.ai/new
+#
+# Local trial (without a registry):
+#   smithery mcp add ./mcp/run_server.py --id answrank   # stdio, local
+#   smithery tool list answrank
+#   smithery tool call answrank answrank_generate_fixes '{"domain":"example.com"}'
+#
+# Docs: https://smithery.ai/docs  ·  MCP spec: https://modelcontextprotocol.io/specification/2025-06-18
+#
+# Anahtarlar: answrank_audit ve answrank_generate_fixes API anahtarı İSTEMEZ.
+# answrank_citations için en az bir LLM sağlayıcı anahtarı gerekir (aşağıda).
+version: 1
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      db_path:
+        type: string
+        description: "SQLite yolu (audit/citation geçmişi)"
+        default: ""
+  command: python
+  args:
+    - -m
+    - answrank.mcp.server
+  env:
+    ANSWRANK_DB_PATH:
+      description: "SQLite yolu; boş = paket varsayılanı"
+      default: ""
+      required: false
+    ANSWRANK_GROUNDING:
+      description: "0 = audit sırasında canlı grounding fetch'leri devre-dışı"
+      default: "1"
+      required: false
+    PERPLEXITY_API_KEY:
+      description: "Citation testi için LLM anahtarı (yalnızca answrank_citations)"
+      default: ""
+      required: false
+    OPENAI_API_KEY:
+      description: "Citation testi için LLM anahtarı (yalnızca answrank_citations)"
+      default: ""
+      required: false
+    GEMINI_API_KEY:
+      description: "Citation testi için LLM anahtarı (yalnızca answrank_citations)"
+      default: ""
+      required: false
+    ANTHROPIC_API_KEY:
+      description: "Citation testi için LLM anahtarı (yalnızca answrank_citations)"
+      default: ""
+      required: false
+    MISTRAL_API_KEY:
+      description: "Citation testi için LLM anahtarı (yalnızca answrank_citations)"
+      default: ""
+      required: false

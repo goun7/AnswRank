@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c"/>
+      <stop offset="100%" stop-color="#121216"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b00"/>
+      <stop offset="100%" stop-color="#ff3b00"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="url(#bg4)" rx="32"/>
+
+  <!-- Icon: Monospaced Bracket [ Context ] + Rank Arrow ^ -->
+  <g transform="translate(400, 330)">
+    <!-- Left Square Bracket (LLM Context Boundary) -->
+    <path d="M -60,-110 L -120,-110 L -120,110 L -60,110" 
+          stroke="#ffffff" stroke-width="20" stroke-linecap="square" fill="none"/>
+
+    <!-- Upward Sharp Ascending Rank Chevron (International Orange) -->
+    <path d="M -30,50 L 30,-20 L 90,50" 
+          stroke="url(#orangeGrad)" stroke-width="22" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+    
+    <!-- Direct Citation Target Dot -->
+    <circle cx="30" cy="-70" r="14" fill="#ff4f00"/>
+
+    <!-- Right Climax Bracket -->
+    <path d="M 80,-110 L 140,-110 L 140,110 L 80,110" 
+          stroke="#27272a" stroke-width="14" stroke-linecap="square" fill="none"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="400" y="595" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', -apple-system, BlinkMacSystemFont, monospace" 
+        font-size="44" font-weight="800" letter-spacing="4" fill="#ffffff">
+    answ<tspan fill="#ff4f00">_rank</tspan>
+  </text>
+  
+  <text x="400" y="640" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" 
+        font-size="13" font-weight="600" letter-spacing="4" fill="#52525b">
+    SYSTEMATIC AEO INFRASTRUCTURE
+  </text>
+</svg>

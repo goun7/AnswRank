@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "answrank"
+version = "1.0.0"
+description = "Answer Engine Optimization (AEO) and Generative Engine Optimization (GEO) Audit Engine"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "LicenseRef-AnswRank-Proprietary"
+authors = [
+    { name = "AnswRank Core Team" }
+]
+keywords = ["aeo", "geo", "seo", "answer-engine-optimization", "ai-search", "llm-seo", "chatgpt-search", "perplexity", "audit", "visibility"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Text Processing :: Markup :: HTML",
+]
+dependencies = [
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "beautifulsoup4>=4.12.0",
+    "rich>=13.0.0",
+    "jinja2>=3.1.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/goun7/AnswRank"
+Documentation = "https://github.com/goun7/AnswRank#readme"
+Repository = "https://github.com/goun7/AnswRank"
+Issues = "https://github.com/goun7/AnswRank/issues"
+
+[project.scripts]
+answrank = "answrank.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["answrank*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+pythonpath = ["."]
