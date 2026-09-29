@@ -448,3 +448,162 @@ def test_sorgu_kumesi_toplam_sayi():
     """Kumenin tamaminin olculabilir olmasi (maks 11)."""
     tum = sum(len(v) for v in ag.SORGU_KUMESI.values())
     assert tum == 11
+
+
+# ---------------------------------------------------------------------------
+# Erisim olce — llms.txt agirligi kosesi
+# ---------------------------------------------------------------------------
+def test_erisim_olce_llms_dusuk_skor_puan_vermez():
+    """llms.txt var ama skoru 1 (< 2) ise +4 puan GELMEMELI."""
+    robots = "User-agent: *\nAllow: /\n"
+    sonuc = ag.erisim_olce(
+        "example.com", robots,
+        temel={"erisilebilir": True, "https_var": True},
+        robots_durum={"sitemap.xml": {"var": True}},
+        llms_sonuc={"var": True, "skor": 1})
+    # 8 (crawler izinli) + 4 (sitemap) + 4 (https) + 0 (llms < 2) = 16
+    assert sonuc["puan"] == 16
+    assert sonuc["engelli_ai_crawlerlar"] == []
+
+
+def test_erisim_olce_llms_yuksek_skor_puan_verir():
+    """Ayni kurulumda llms skoru >= 2 ise +4 daha (toplam 16)."""
+    robots = "User-agent: *\nAllow: /\n"
+    sonuc = ag.erisim_olce(
+        "example.com", robots,
+        temel={"erisilebilir": True, "https_var": True},
+        robots_durum={"sitemap.xml": {"var": True}},
+        llms_sonuc={"var": True, "skor": 2})
+    assert sonuc["puan"] == 20  # 8+4+4+4, tavan 20
+
+
+# ---------------------------------------------------------------------------
+# Serper HTTP hata kodlari — 429 kota kosesi
+# ---------------------------------------------------------------------------
+def test_serper_istek_429_kota_hatasi():
+    """HTTP 429 SerperHata vermeli (anahtar hicbir mesaja karismaz)."""
+    import urllib.error
+
+    class _Resp429(urllib.error.HTTPError):
+        def __init__(self):
+            super().__init__("http://x", 429, "Too Many", {}, None)
+
+    def fake_urlopen(req, timeout=None):
+        raise _Resp429()
+
+    orij = urllib.request.urlopen
+    urllib.request.urlopen = fake_urlopen
+    try:
+        with pytest.raises(ag.SerperHata) as ex:
+            ag.serper_istek("TESTKEY", "q", 5)
+        assert "429" in str(ex.value)
+        assert "TESTKEY" not in str(ex.value)
+    finally:
+        urllib.request.urlopen = orij
+
+
+# ---------------------------------------------------------------------------
+# Rapor metni — "hic bulunamadi" ve engelli crawler uyarisi
+# ---------------------------------------------------------------------------
+def _olcum_sablonu(bulundu, position, engelli, listicle):
+    """Biyolite benzeri bir olcum sozlugu (SATIS_ARGUMANI.md referans alir)."""
+    return {
+        "domain": "biolitedubai.com",
+        "sorgu_sayisi": 5,
+        "kredi_kullanildi": 0,
+        "ai_alinti_puani": 39.0,
+        "siralama": {"sorgular": [
+            {"sorgu": "dentist Dubai", "bulundu": bulundu,
+             "position": position}]},
+        "rekabet": {"ust10_orani": 0.2},
+        "icerik": {"kelime_sayisi": 2769, "schema_turu": "WebSite",
+                   "faq_var": True},
+        "erisim": {"engelli_ai_crawlerlar": engelli},
+        "rakip": {"rakipler": [
+            {"domain": "drjoydentalclinic.com", "ust10_sayisi": 5,
+             "en_iyi_sira": 1}],
+            "listicle_firsati_var": listicle},
+        "alt_puanlar": {
+            "siralama": {"puan": 0.0, "agirlik": 0.45},
+            "icerik": {"puan": 68.0, "agirlik": 0.25},
+            "erisim": {"puan": 100.0, "agirlik": 0.20},
+            "rekabet": {"puan": 20.0, "agirlik": 0.10},
+        },
+        "uyarilar": ag.uret_uyarilar([]),
+    }
+
+
+def test_rapor_metni_hic_bulunamadi_mesaji():
+    metin = ag.rapor_metni(_olcum_sablonu(False, None, [], False))
+    assert "HICBIR sorguda ilk 10'da degilsiniz" in metin
+
+
+def test_rapor_metni_engelli_ai_crawler_uyarisi():
+    """Engelli AI crawler varsa rapor acikca belirtmeli (Grossman 2026)."""
+    metin = ag.rapor_metni(_olcum_sablonu(False, None, ["GPTBot"], False))
+    assert "ENGELLI AI crawler" in metin
+    assert "GPTBot" in metin
+
+
+def test_rapor_metni_listicle_firsati():
+    metin = ag.rapor_metni(_olcum_sablonu(False, None, [], True))
+    assert "FIRSAT" in metin
+    assert "%21" in metin
+
+
+# ---------------------------------------------------------------------------
+# Cache katmani — SATIS_ARGUMANI.md §4 "aylik takip" sozunun motoru
+# ---------------------------------------------------------------------------
+def test_serper_ara_cache_ttl_dolunca_yeniden_ister(tmp_path):
+    """24 saatten eski cache gecersiz — Serper'a YENIDEN gitmeli.
+
+    Bu kose SATIS_ARGUMANI.md §4'un sozunu korur: "kaynaklar %65
+    degistigi icin tek seferlik skor anlamsizdir". TTL hic sonmezse,
+    aylik takip sessizce eski veri dondururdu.
+    """
+    cagirmalar = []
+
+    def fetch(api_key, sorgu, num):
+        cagirmalar.append(sorgu)
+        return {"organic": []}
+
+    d = str(tmp_path)
+    ag.serper_ara("dentist Dubai", "K", cache_dizini=d, fetch_fn=fetch)
+    # Cache dosyasini 25 saat oncesine "yaslandir"
+    yol = ag.cache_yolu("dentist Dubai", ag.SERPER_NUM, d)
+    eski = os.path.getmtime(yol) - (25 * 60 * 60)
+    os.utime(yol, (eski, eski))
+    # TTL dolmus cache hit sayilmaz -> yeniden istek (kredi = 1)
+    sonuc = ag.serper_ara("dentist Dubai", "K", cache_dizini=d, fetch_fn=fetch)
+    assert len(cagirmalar) == 2
+    assert sonuc["cached"] is False
+    assert sonuc["kredi_kullanildi"] == 1
+
+
+def test_serper_ara_bozuk_cache_graceful_tekrar_ister(tmp_path):
+    """Cache dosyasi bozuk JSON ise HATA vermemeli, yeniden istemeli."""
+    cagirmalar = []
+
+    def fetch(api_key, sorgu, num):
+        cagirmalar.append(sorgu)
+        return {"organic": []}
+
+    d = str(tmp_path)
+    yol = ag.cache_yolu("q", ag.SERPER_NUM, d)
+    os.makedirs(d, exist_ok=True)
+    with open(yol, "w", encoding="utf-8") as f:
+        f.write("{BOZUK")
+    sonuc = ag.serper_ara("q", "K", cache_dizini=d, fetch_fn=fetch)
+    assert len(cagirmalar) == 1  # bozuk cache gecersiz sayildi
+    assert sonuc["cached"] is False
+    assert sonuc["kredi_kullanildi"] == 1
+
+
+def test_cache_yolu_deterministik_ve_num_farkli(tmp_path):
+    """Ayni sorgu+num AYNI yolu, farkli num FARKLI yolu vermeli."""
+    d = str(tmp_path)
+    p1 = ag.cache_yolu("dentist Dubai", 10, d)
+    p2 = ag.cache_yolu("dentist Dubai", 10, d)
+    p3 = ag.cache_yolu("dentist Dubai", 20, d)
+    assert p1 == p2
+    assert p1 != p3
