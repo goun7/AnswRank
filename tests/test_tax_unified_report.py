@@ -36,16 +36,26 @@ def ledger():
 @pytest.fixture
 def mixed_ledger(ledger):
     """3 urun, karisik yurt ici/yurt disi rejim."""
-    ledger.record_invoice("Klinik A", "TR", "TRY", 1000,
-                          product_name="answrank/audit")
-    ledger.record_invoice("UK Clinic", "GB", "GBP", 50,
-                          product_name="cleartag/dogrula")
-    ledger.record_invoice("Dental B", "TR", "TRY", 500,
-                          product_name="pqhaven/tara")
-    ledger.record_invoice("US Lab", "US", "USD", 75,
-                          product_name="mcpguard/evaluate")
-    ledger.record_invoice("DE GmbH", "DE", "EUR", 40,
-                          product_name="answrank/citations")
+    kayitlar = [
+        ledger.record_invoice("Klinik A", "TR", "TRY", 1000,
+                              product_name="answrank/audit"),
+        ledger.record_invoice("UK Clinic", "GB", "GBP", 50,
+                              product_name="cleartag/dogrula"),
+        ledger.record_invoice("Dental B", "TR", "TRY", 500,
+                              product_name="pqhaven/tara"),
+        ledger.record_invoice("US Lab", "US", "USD", 75,
+                              product_name="mcpguard/evaluate"),
+        ledger.record_invoice("DE GmbH", "DE", "EUR", 40,
+                              product_name="answrank/citations"),
+    ]
+    # DONEM SABITLEME: record_invoice created_at olarak BUGUNU yazar (UTC);
+    # generate_monthly_unified_report donemi created_at'e gore filtreler.
+    # Testler 2026-09 donemini sorgular (rapor "Eylul" icerigi + dosya adi
+    # bunu varsayar) — bu yuzden kayitlari test edilen aya sabitliyoruz.
+    # Gercek API davranisi (created_at donem filtresi) OLDUGU GIBI korunur;
+    # bu, dosyadaki test_ay_filtresi_* testlerinde kullanilan ayni idiomdur.
+    for r in kayitlar:
+        r.created_at = "2026-09-15"
     return ledger
 
 
@@ -172,10 +182,14 @@ def test_bos_donem_bos_rapor(ledger, tmp_path):
 
 def test_yurt_disi_rejim_korunuyor_kritik(ledger):
     """Orkestrator: yurt ici/yurt disi ayrami KRITIK — korunmali."""
-    ledger.record_invoice("TR X", "TR", "TRY", 1000,
-                          product_name="answrank/audit")
-    ledger.record_invoice("UK Y", "GB", "GBP", 100,
-                          product_name="answrank/audit")
+    r1 = ledger.record_invoice("TR X", "TR", "TRY", 1000,
+                               product_name="answrank/audit")
+    r2 = ledger.record_invoice("UK Y", "GB", "GBP", 100,
+                               product_name="answrank/audit")
+    # DONEM SABITLEME: record_invoice BUGUNU (UTC) yazar; test 2026-09
+    # donemini sorgular — kayitlari o aya sabitliyoruz (API davranisi ayni).
+    r1.created_at = "2026-09-15"
+    r2.created_at = "2026-09-15"
     rep = ledger.generate_monthly_unified_report(
         2026, 9, output_dir=None, write_file=False)
     row = rep.product_rows[0]
