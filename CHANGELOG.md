@@ -4,7 +4,7 @@
 
 ## [0.1.0] — 2026-09-29
 - İlk genel sürüm: AnswRank
-- [![CI](https://github.com/goun7/AnswRank/actions/workflows/ci.yml/badge.svg)](https://github.com/goun7/AnswRank/actions/workflows/ci.yml)
+- **Audit your website the way AI search engines see it.**
 
 ## Sürümleme
 
