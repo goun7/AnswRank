@@ -735,8 +735,13 @@ def test_repeat_send_of_non_reusable_status_is_rejected(db, monkeypatch):
 def test_stale_reason_normalizes_naive_timestamp(db):
     """Naive (tzinfo'suz) ölçüm tarihi UTC varsayılmalı; geçerli sayılıp
     tazelik hesaplanmalı, hata dönmeli."""
+    # [Fix-2026-10-02] Tarih sabit DEGIL, bugune göre göreli olmalı —
+    # sabit 2026-09-17 testin yazildigi gun gecerliydi; 30-gun
+    # penceresi 2026-10-17'de dolar ve == "" iddiasi o gun FAIL ederdi
+    # (82c63d5 ile ayni sinif).
+    naive = (datetime.now(timezone.utc) - timedelta(days=1)).replace(
+        tzinfo=None).strftime("%Y-%m-%dT%H:%M:%S")
     d = DmDispatcher(db=db)
-    naive = "2026-09-17T00:00:00"
     assert d._stale_reason({"created_at": naive}, 30) == ""
     assert d._stale_reason({"created_at": naive}, 0).startswith("ölçüm")
 
