@@ -270,3 +270,67 @@ research, in [`docs/arastirma/`](docs/arastirma):
 ## License
 
 Proprietary (source-available). Dağıtım, satış ve ticari kullanım yasaktır — bkz. [LICENSE](LICENSE).
+
+## Akademik Kaynaklar (2024-2026)
+
+Bu çalışma aşağıdaki araştırmaya dayanır (her referans canlı
+doğrulanmıştır):
+
+- **[1] Üretken motor optimizasyonu (GEO) — içerik yapısı** —
+  *Structural Feature Engineering for Generative Engine Optimization: How
+  Content Structure Shapes Citation Behavior* — Yu et al., arXiv 2026.
+  İçeriğin yapısal özelliklerinin (başlık, liste, alıntı yeri) üretken
+  motorların alıntı davranışını nasıl şekillendirdiğini gösterir;
+  AnswRank'ın "citability / RAG-readiness" kategorisinin temelidir.
+  [arXiv:2603.29979](https://arxiv.org/abs/2603.29979)
+- **[2] Sorgu türüne göre GEO optimizasyonu** —
+  *Query Implied Generative Engine Optimization* — Ramakrishna &
+  Andreopoulos, arXiv 2026.
+  Sorunun türüne (bilgi, işlem, karşılaştırma) göre alıntı eğilimlerinin
+  değiştiğini ortaya koyar; `answrank citations` soru bankasının sektörlere
+  göre dağıtımına gerekçe oluşturur.
+  [arXiv:2609.27845](https://arxiv.org/abs/2609.27845)
+- **[3] Ajan tabanlı GEO optimizasyonu** —
+  *Agent2UCB: Agentic System for Generative Engine Optimization* —
+  Yu et al., arXiv 2026.
+  Bir ajanın deneme-yanılma ile içerik değişikliklerinin alıntı etkisini
+  ölçtüğü otomatik bir GEO sistemi tanıtır; AnswRank'ın "audit → fix →
+  yeniden ölç" döngüsünün akademik karşılığıdır.
+  [arXiv:2608.29063](https://arxiv.org/abs/2608.29063)
+- **[4] Alıntı hatalarının teşhisi ve onarımı** —
+  *Diagnosing and Repairing Citation Failures in Generative Engine
+  Optimization* — Tian et al., arXiv 2026.
+  Üretken motorların bir kaynağı neden alıntılamadığını sınıflandırır ve
+  teşhis edilebilir onarım önerileri gider; "negative signals" kategorisi ile
+  her bulgunun dosya/satır/düzeltme raporlamasını gerekçelendirir.
+  [arXiv:2603.09296](https://arxiv.org/abs/2603.09296)
+- **[5] AI arama motorlarında marka görünürlüğü** —
+  *Generative Engine Optimization at Scale: Measuring Brand Visibility Across
+  AI Search Engines* — Kumar, arXiv 2026.
+  Birden çok AI arama motoru üzerinden marka görünürlüğünü ölçmeye yarayan
+  bir metodoloji sunar; `answrank citations`'ın 5 sağlayıcılı ölçümünün
+  (ve her sağlayıcı için ayrı raporlamanın) temelidir.
+  [arXiv:2606.20065](https://arxiv.org/abs/2606.20065)
+- **[6] AEO ve ChatGPT yönlendirme trafiği** —
+  *Disentangling Answer Engine Optimization from Platform Growth: A
+  Log-Based Natural Experiment on ChatGPT Referral Traffic* — Watanabe &
+  Nakayashiki, arXiv 2026.
+  ChatGPT yönlendirme trafiğindeki bir artışın AEO çalışmasından mı yoksa
+  platformun genel büyümesinden mi kaynaklandığını ayırır; "lost-revenue
+  estimate" ve sıralama-ağırlıkları konusundaki gerçekçi olma vurgumuzu
+  destekler.
+  [arXiv:2606.04362](https://arxiv.org/abs/2606.04362)
+- **[7] SEO'dan içerik optimizasyonuna dönüşüm** —
+  *Beyond SEO: A Transformer-Based Approach for Reinventing Web Content
+  Optimisation* — Lüttgenau et al., arXiv 2025.
+  Klasik SEO metriklerinin yerine içeriğin makine tarafından
+  anlaşılabilirliğini ölçmeyi önerir; AnswRank'ın "klasik SEO yüzeyini değil,
+  makine-okunabilir yüzeyi ölçme" tasarım kararıyla örtüşür.
+  [arXiv:2507.03169](https://arxiv.org/abs/2507.03169)
+- **[8] Web arama ile üretken AI yanıtlarının karşılaştırması** —
+  *Navigating the Shift: A Comparative Analysis of Web Search and Generative
+  AI Response Generation* — Chen et al., arXiv 2026.
+  Geleneksel web arama ile üretken AI yanıtları arasındaki yapısal farkları
+  karşılaştırır; "traffic discovery is moving from blue links to answers"
+  motivasyonunun akademik dayanağıdır.
+  [arXiv:2601.16858](https://arxiv.org/abs/2601.16858)
