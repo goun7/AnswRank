@@ -573,12 +573,16 @@ def test_recurrence_gate_rejects_unreadable_send_timestamp(db):
     _seed_measurement(db, "badts2.example", days_ago=1)
     _seed_probe(db, "badts2.example")
     _seed_prospect(db, "badts2.example", email="i@badts2.example")
+    # [Fix-2026-10-02] Tarih sabit DEĞIL, bugune göre göreli olmalı —
+    # sabit 2026-09-18 testin yazildigi gun gecerliydi, 14 gun sonra
+    # repeat_days penceresinin disina cikinca gate gecersiz oluyordu.
+    recent = (datetime.now(timezone.utc) - timedelta(days=1)).replace(tzinfo=None)
     with db._get_connection() as conn:
         conn.execute(
             "INSERT INTO dm_send_log (queue_id, domain, recipient, status, note, sent_at)"
             " VALUES (?,?,?,?,?,?)",
             (1, "badts2.example", "i@badts2.example", "GÖNDERİLDİ",
-             "onceki", "2026-09-18T00:00:00"))
+             "onceki", recent.strftime("%Y-%m-%dT%H:%M:%S")))
         conn.commit()
     DmGateAuditor(db=db)._gate_repeat("badts2.example")  # naive ts
     # naive timestamp tzinfo eklenir, fail-closed kalır
