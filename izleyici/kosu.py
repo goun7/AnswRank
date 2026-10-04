@@ -9,17 +9,23 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import re
 from typing import Callable, Optional
 
 from . import takip
 
 SNAP_KOK = os.path.join(takip.IZLE_KOK, "snapshots")
+TARIH_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def snapshot_yolu(domain: str, tarih: Optional[str] = None) -> str:
-    d = takip.normalle(domain)
+    d = takip.normalle(domain)  # regex doğrulaması: ".."/"/" imkânsız
     t = tarih or datetime.date.today().isoformat()
-    return os.path.join(SNAP_KOK, d, f"{t}.json")
+    if not TARIH_RE.match(t):
+        raise ValueError("geçersiz tarih: %r" % (tarih,))
+    yol = os.path.join(SNAP_KOK, d, f"{t}.json")
+    takip.kapsamda(yol, SNAP_KOK)  # savunma-derinliği: kapsama iddiası
+    return yol
 
 
 def snapshot_yaz(sonuc: dict, yol: str) -> str:

@@ -14,9 +14,19 @@ from . import delta, kosu, takip
 def _cmd_add(args):
     sorgular = []
     if args.sorgular:
-        with open(args.sorgular, encoding="utf-8") as f:
+        # sorgu dosyası proje kökü içinde olmalı (path-traversal kapısı)
+        try:
+            tam = takip.kapsamda(args.sorgular, takip.HERE)
+        except ValueError as exc:
+            print("hata: %s" % exc, file=sys.stderr)
+            return 1
+        with open(tam, encoding="utf-8") as f:
             sorgular = [x.strip() for x in f if x.strip()]
-    takip.ekle(args.domain, sorgular or None)
+    try:
+        takip.ekle(args.domain, sorgular or None)
+    except ValueError as exc:
+        print("hata: %s" % exc, file=sys.stderr)
+        return 1
     print("takip eklendi: %s (%d sorgu)" % (takip.normalle(args.domain),
                                             len(sorgular)))
     return 0

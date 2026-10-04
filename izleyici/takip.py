@@ -8,11 +8,19 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from typing import Dict, List, Optional
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IZLE_KOK = os.path.join(HERE, "olcumler", "izleyici")
 TAKIP_DOSYASI = os.path.join(IZLE_KOK, "takip.json")
+
+# Alan adı: nokta-ayrı, boş etiket yok -> ".." ve "/" mümkün değil.
+# W2'de domain web formundan (güvenilmeyen giriş) gelecek; yol-elemanı
+# olarak kullanılmadan ÖNCE burada sıkıştırılır.
+DOMAIN_RE = re.compile(
+    r"^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?"
+    r"(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$")
 
 
 def normalle(domain: str) -> str:
@@ -20,10 +28,23 @@ def normalle(domain: str) -> str:
     for on in ("https://", "http://"):
         if d.startswith(on):
             d = d[len(on):]
-    return d.rstrip("/").split("/")[0].removeprefix("www.")
+    d = d.rstrip("/").split("/")[0].removeprefix("www.")
+    if not DOMAIN_RE.match(d):
+        raise ValueError("geçersiz alan adı: %r" % (domain,))
+    return d
+
+
+def kapsamda(yol: str, kok: str) -> str:
+    """Yol <kok> içinde çözümlenmeli — aksi hâlde ValueError."""
+    kok_tam = os.path.realpath(os.path.abspath(kok))
+    tam = os.path.realpath(os.path.abspath(yol))
+    if tam != kok_tam and not tam.startswith(kok_tam + os.sep):
+        raise ValueError("yol izinli kökün dışında: %r" % (yol,))
+    return tam
 
 
 def yukle(yol: str = TAKIP_DOSYASI) -> Dict[str, dict]:
+    kapsamda(yol, IZLE_KOK)
     if not os.path.exists(yol):
         return {}
     try:
@@ -34,6 +55,7 @@ def yukle(yol: str = TAKIP_DOSYASI) -> Dict[str, dict]:
 
 
 def kaydet(takip: Dict[str, dict], yol: str = TAKIP_DOSYASI) -> str:
+    kapsamda(yol, IZLE_KOK)
     os.makedirs(os.path.dirname(yol), exist_ok=True)
     with open(yol, "w", encoding="utf-8") as f:
         json.dump(takip, f, ensure_ascii=False, indent=2, sort_keys=True)
