@@ -151,6 +151,46 @@ and fix tools need none):
 | `answrank_citations` | Brand citation rate across 5 AI models | Yes (≥1) |
 | `answrank_generate_fixes` | Ready-to-paste `robots.txt`, `llms.txt`, JSON-LD | **No** |
 
+### Paid mode — Sester x402 (mesh code bond)
+
+By default the server runs **free** (no payment configuration). Set
+`ANSWRANK_SELLER_SECRET` (≥ 16 chars) and the three tools become paid per
+call through the [Sester](https://github.com/goun7/Sester) x402 rail —
+the same `x402_servis.py` / `mainnet_guard.py` pattern already used by the
+sibling Unpump-pool services:
+
+```json
+{
+  "mcpServers": {
+    "answrank": {
+      "command": "python",
+      "args": ["-m", "answrank.mcp.server"],
+      "env": {
+        "OPENAI_API_KEY": "sk-...",
+        "ANSWRANK_SELLER_SECRET": "<16+ char seller secret>"
+      }
+    }
+  }
+}
+```
+
+A client then passes the Sester receipt it received as `payment_receipt`
+(and its EOA as `payer_address` for mainnet verification). The gate is
+fail-closed: no receipt, no audit; in mainnet mode the actual USDC
+transfer is looked up on chain, so a signed "I paid" claim with no
+matching transfer is rejected. Every paid response carries a
+`payment` block with the ledger sequence, the receipt hash and the
+SHA-256 anchor of exactly what was delivered — recomputable by the
+client. In free mode the same block is returned labelled `mode: "free"`.
+
+| Env | Meaning |
+|---|---|
+| `ANSWRANK_SELLER_SECRET` | Enables paid mode (≥ 16 chars; empty = free mode) |
+| `ANSWRANK_TEST` / `UNPUMP_TEST` | Simulation mode: skip the on-chain transfer check (output labelled `paid-test`) |
+| `ANSWRANK_PAY_TO` | Payee (EOA or `sester:<agent>`); used for the chain lookup |
+| `ANSWRANK_RECEIPTS_DB` | Receipt ledger path (default `~/.workspace/answrank/receipts.sqlite`) |
+| `ANSWRANK_PRICE_AUDIT` / `_CITATIONS` / `_FIX` | Per-tool USD prices (defaults $0.05 / $1.20 / $0.20) |
+
 Registry-ready: [`mcp/mcp.json`](mcp/mcp.json),
 [`mcp/smithery.yaml`](mcp/smithery.yaml), and free-tier publishing notes in
 [`mcp/REGISTRIES.md`](mcp/REGISTRIES.md).

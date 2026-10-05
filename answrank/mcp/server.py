@@ -16,6 +16,9 @@ from answrank.citations.questions import QUESTION_COUNT as _QC
 from answrank.reporting.fix_generator import FixGenerator
 from answrank.reporting.generator import ReportGenerator
 from answrank.db import Database
+from answrank.x402_gate import (
+    SesterPaymentGate, PaymentRequired, TOOL_PRICES as _TOOL_PRICES,
+)
 from answrank import __version__
 
 class AnswRankMCPServer:
@@ -27,25 +30,42 @@ class AnswRankMCPServer:
         self.fix_gen = FixGenerator()
         self.rep_gen = ReportGenerator()
         self.db = Database()
+        # mesh code bond (2026-10-05): Sester x402 odeeme kapisi.
+        # Ucretsiz modda (ANSWRANK_SELLER_SECRET yok) etkisizdir; mevcut
+        # davranis ve testler korunur. Odemeli modda fail-closed: makbuz
+        # dogrulanir, mainnet'te zincirde USDC transferi aranir.
+        self.gate = SesterPaymentGate()
 
     def get_tool_definitions(self) -> List[Dict[str, Any]]:
         """Returns tool schema definitions for MCP discovery."""
         return [
             {
                 "name": "answrank_audit",
-                "description": "Audits a website for AI answer engine visibility (AEO/GEO) across 8 categories (0-100 score).",
+                "description": (
+                    f"Audits a website for AI answer engine visibility (AEO/GEO)"
+                    f" across 8 categories (0-100 score). Paid tool:"
+                    f" ${_TOOL_PRICES['answrank_audit']:.2f} USDC via Sester x402"
+                    f" (free when the server runs without ANSWRANK_SELLER_SECRET;"
+                    f" pass a Sester receipt as `payment_receipt` to settle)."),
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "url": {"type": "string", "description": "Target website URL"},
                         "sector": {"type": "string", "enum": ["dental", "accounting", "aesthetic", "general"], "default": "general"},
+                        "payment_receipt": {"type": "object", "description": "Sester x402 receipt for this call (required only when the payment gate is enabled)"},
+                        "payer_address": {"type": "string", "description": "Payer EOA (0x + 40 hex); required only for mainnet payment verification"},
                     },
                     "required": ["url"],
                 },
             },
             {
                 "name": "answrank_citations",
-                "description": f"Runs {_QC} sector questions across {len(_MODELS)} AI models ({', '.join(m.split('-')[0] for m in _MODELS)}) to test brand citation rate.",
+                "description": (
+                    f"Runs {_QC} sector questions across {len(_MODELS)} AI models"
+                    f" ({', '.join(m.split('-')[0] for m in _MODELS)}) to test brand"
+                    f" citation rate. Paid tool:"
+                    f" ${_TOOL_PRICES['answrank_citations']:.2f} USDC via Sester x402"
+                    f" (the most expensive tool: multi-LLM calls)."),
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -55,13 +75,19 @@ class AnswRankMCPServer:
                         "city": {"type": "string", "default": "İstanbul"},
                         "lang": {"type": "string", "enum": ["tr", "en"], "default": "tr",
                                  "description": "Soru-bankası dili (E4 EN bankaları; bankasız dil reddedilir)"},
+                        "payment_receipt": {"type": "object", "description": "Sester x402 receipt for this call (required only when the payment gate is enabled)"},
+                        "payer_address": {"type": "string", "description": "Payer EOA (0x + 40 hex); required only for mainnet payment verification"},
                     },
                     "required": ["brand", "domain"],
                 },
             },
             {
                 "name": "answrank_generate_fixes",
-                "description": "Auto-generates ready-to-copy robots.txt, llms.txt, and JSON-LD schema for a domain.",
+                "description": (
+                    "Auto-generates ready-to-copy robots.txt, llms.txt, and JSON-LD"
+                    f" schema for a domain. Paid tool:"
+                    f" ${_TOOL_PRICES['answrank_generate_fixes']:.2f} USDC via"
+                    f" Sester x402."),
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -69,6 +95,8 @@ class AnswRankMCPServer:
                         "brand": {"type": "string", "description": "Brand name"},
                         "sector": {"type": "string", "default": "dental"},
                         "city": {"type": "string", "default": "İstanbul"},
+                        "payment_receipt": {"type": "object", "description": "Sester x402 receipt for this call (required only when the payment gate is enabled)"},
+                        "payer_address": {"type": "string", "description": "Payer EOA (0x + 40 hex); required only for mainnet payment verification"},
                     },
                     "required": ["domain"],
                 },
@@ -89,14 +117,33 @@ class AnswRankMCPServer:
                 + f" (provided keys: {sorted(arguments) or 'none'})")
 
     async def call_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
-        """Dispatches and executes MCP tool requests."""
+        """Dispatches and executes MCP tool requests.
+
+        Mesh code bond (2026-10-05): paid tools pass the Sester x402 gate
+        BEFORE any work runs (fail-closed: no receipt, no audit), and the
+        delivery is anchored to the receipt ledger AFTER the result exists.
+        """
+        # once arguman nesnesi dogrulanir (dostu hata), sonra odeme kapisi
+        self._require(arguments)
+        if name in _TOOL_PRICES:
+            try:
+                self.gate.require(
+                    tool=name,
+                    receipt=arguments.get("payment_receipt"),
+                    payer=arguments.get("payer_address"),
+                )
+            except PaymentRequired as pe:
+                # MCP sematigi: istemci-hatasi isError RESULT olarak doner,
+                # boylece kullanici 402 sebebini gorur (transport hatasi degil)
+                raise ValueError(f"payment required ({name}): {pe}") from pe
+
         if name == "answrank_audit":
             self._require(arguments, "url")
             url = arguments["url"]
             sector = arguments.get("sector", "general")
             audit_res = await self.engine.audit_url(url, sector=sector)
             await self.db.save_audit(audit_res)
-            return {
+            result = {
                 "overall_score": audit_res.overall_score,
                 "score_band": audit_res.score_band,
                 "domain": audit_res.domain,
@@ -116,7 +163,7 @@ class AnswRankMCPServer:
                 lang=arguments.get("lang", "tr"),
             )
             await self.db.save_citations(res)
-            return {
+            result = {
                 "brand": res.brand_name,
                 "citation_rate_percentage": res.citation_rate_percentage,
                 "citations_found": res.brand_citations_found,
@@ -134,7 +181,7 @@ class AnswRankMCPServer:
             sector = arguments.get("sector", "dental")
             city = arguments.get("city", "İstanbul")
 
-            return {
+            result = {
                 "robots_txt": self.fix_gen.generate_robots_txt(domain),
                 "llms_txt": self.fix_gen.generate_llms_txt(brand, domain, sector, city),
                 "json_ld": self.fix_gen.generate_json_ld(brand, domain, sector, city),
@@ -142,6 +189,44 @@ class AnswRankMCPServer:
 
         else:
             raise ValueError(f"Unknown tool: {name}")
+
+        # mesh code bond: teslimat kaniiti -- odenen ciktinin anchor hash'i
+        # receipt ledger'a yazilir; ucretsiz modda yine de hesaplanir ve
+        # yanit acikca 'free' olarak etiketlenir (no silent guessing).
+        result["payment"] = self.gate.settle(
+            tool=name,
+            anchor=self._anchor_for(name, arguments, result),
+            receipt=arguments.get("payment_receipt"),
+            payer=arguments.get("payer_address"),
+        ).as_dict()
+        return result
+
+    @staticmethod
+    def _anchor_for(name: str, arguments: Dict[str, Any],
+                    result: Dict[str, Any]) -> Dict[str, Any]:
+        """Ledger'a yazilacak machine-checkable cikti ozeti.
+
+        Musteri ayni degerlerle anchor_hash'i tekrar hesaplayip makbuzun
+        HANGI ciktiya ait oldugunu bagimsiz dogrular.
+        """
+        if name == "answrank_audit":
+            return {
+                "domain": result.get("domain"),
+                "overall_score": result.get("overall_score"),
+                "score_band": result.get("score_band"),
+            }
+        if name == "answrank_citations":
+            return {
+                "brand": result.get("brand"),
+                "citation_rate_percentage": result.get("citation_rate_percentage"),
+                "total_runs": result.get("total_runs"),
+            }
+        # generate_fixes: uretilen 3 artefaktin SHA-256'i = teslimat kaniiti
+        import hashlib as _hashlib
+        digest = _hashlib.sha256()
+        for key in ("robots_txt", "llms_txt", "json_ld"):
+            digest.update(f"{key}:{result.get(key, '')}".encode("utf-8"))
+        return {"domain": arguments.get("domain"), "sha256": digest.hexdigest()}
 
     async def run_stdio(self, reader=None):
         """Standard JSON-RPC line loop implementing the MCP lifecycle.
