@@ -374,3 +374,64 @@ doğrulanmıştır):
   karşılaştırır; "traffic discovery is moving from blue links to answers"
   motivasyonunun akademik dayanağıdır.
   [arXiv:2601.16858](https://arxiv.org/abs/2601.16858)
+
+- **[9] Çok-turlu sohbette alıntı-yakalama (conversational capture)** —
+  *Conversational Capture: A Trajectory-Level Framework for Evaluating
+  Generative Engine Optimization in Multi-turn Human-Agent Interaction* —
+  Yu, Zhou, Yang, Ding & Sato, arXiv 2026 (HAI '26).
+  Erken alıntılanan bir kaynağın sonraki turlarda çok daha fazla alıntılanma
+  eğilimini (conversational capture) gösterir; tek-turlu GEO değerlendirmesinin
+  yetersizliğini kanıtlar ve cumulative conversational visibility ile capture
+  katsayısı tanımlar. AnswRank'ın "görünürlük tek bir anlık karede değil,
+  kullanım-yörüngesinde ölçülür" tasarımının akademik dayanağı.
+  [arXiv:2609.40069](https://arxiv.org/abs/2609.40069)
+
+- **[10] Ajan-okunabilirliği (AX) AEO'nun önüne geçerken** —
+  *AX is the New AEO* — Finder, Elovic, Shalev & Yosef, arXiv 2026.
+  1.056 gerçek işletme üzerinde 37.927 ajan yolculuğuyla gösterir ki
+  yanıtların yalnızca %7–10'u modelin eğitim bilgisinden gelir; ajan-okunabilir
+  (agent-ready) sitelerin yanıtları %78 oranında kendi sayfalarından kurulur ve
+  net-tavsiye oranı 1,9×'tir. AnswRank'ın "makine-okunabilir yüzeyi ölçme"
+  ve AI-görünürlük denetim önceliği için güncel ampirik zemin.
+  [arXiv:2609.34951](https://arxiv.org/abs/2609.34951)
+
+- **[11] AI aramada marka görünürlüğünün uyarlanmış aşama modeli** —
+  *From Prompt to Recommendation: A Fitted Stage Model of Brand Visibility in
+  AI Search* — Tannenbaum, arXiv 2026.
+  34.960 gözlem üzerinden, kendi-domain'i alıntılanan markaların anılma
+  oranının %2,8'den %49'a; marka fan-out'u da eklenince %91,4'e çıktığını
+  gösterir ve prior-run geçmişi + canlı retrieval sinyalleriyle AUC 0,96'lık
+  bir tanı modeli uyarlar. `answrank citations`'ın tekrarlı-ölçüm ve
+  görünürlük-izleme metrikleri için modelleme referansı.
+  [arXiv:2609.23162](https://arxiv.org/abs/2609.23162)
+
+- **[12] AI arama alıntılarının saha deneyi (randomized field experiment)** —
+  *Breaking News Out of the Filter Bubble: Generative AI Search Diversifies
+  Collective Attention and Raises Shared Information Consumption* — Lee, Lee,
+  Lee & Lee, arXiv 2026.
+  The Washington Post'ta 37.561 okuyucuyla randomize saha deneyi: AI yanıtları
+  alıntı yapanların tıklamadan da olsa bilgi tüketimini artırıp daha az
+  popüler konulara kaydırdığını gösterir. "Trafik keşfi mavi linklerden
+  cevaplara taşınıyor" tezinin üretim-ölçeğinde kanıtı.
+  [arXiv:2609.38946](https://arxiv.org/abs/2609.38946)
+
+- **[13] AI overview'lerde çok-platformlu kaynak-maruziyeti denetimi** —
+  *Auditing Source Exposure in Baidu and Google AI Search* — Li, Guan, Cai,
+  Liu & Pierri, arXiv 2026 (WAC @ EMNLP 2026).
+  İngilizce ve Çince sorgularla Baidu ve Google AI overview'larını karşılaştırır;
+  platform-dili ayarlarına göre overview kullanılabilirliği ve görünen
+  kaynak-dağılımının önemli ölçüde değiştiğini gösterir. Her sağlayıcı için
+  ayrı raporlama ve çok-sağlayıcılı ölçüm tasarımımızın (5 motor)
+  gerekçelendirilmesi.
+  [arXiv:2609.24407](https://arxiv.org/abs/2609.24407)
+
+- **[14] AI aramada bağlam-inşası ve içerik-güvenilirliği** —
+  *From Ranked Documents to Reliable Contexts: An Answer-Oriented Context
+  Construct Framework for AI Search* — Zhong, Cai, Su, Qian, Zou, Fan, Xu, Guo,
+  Shi & He, arXiv 2026.
+  AI aramanın amacının "dokümanları sıralamak"tan "doğru cevap için güvenilir
+  bağlam inşa etmeye" kaydığını üç aşamada (Answer Support, Content
+  Trustworthiness, Context Organization) formülleştirir. AnswRank'ın
+  "citability / RAG-readiness" ve içerik-güvenilirliği kategorilerinin
+  endüstri-uygulamalı akademik karşılığı.
+  [arXiv:2609.23354](https://arxiv.org/abs/2609.23354)
