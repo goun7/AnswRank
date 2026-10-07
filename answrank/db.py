@@ -247,6 +247,7 @@ CREATE TABLE IF NOT EXISTS dm_send_log (
         ('GÖNDERİLDİ','HATA','HEDEF_YOK','YAPILANDIRILMAMIŞ','DRY_RUN')),
     note TEXT NOT NULL,
     sent_at TEXT NOT NULL,
+    variant_key TEXT NOT NULL DEFAULT 'variant_1',
     UNIQUE(queue_id, recipient)
 );
 
