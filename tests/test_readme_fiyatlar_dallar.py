@@ -202,6 +202,9 @@ def test_fiyatlar_kod_sabitleri_istisna_yutulur(monkeypatch, capsys):
                                 ConnectionError("stub")))
         monkeypatch.delitem(sys.modules, "x402_servis", raising=False)
         monkeypatch.delitem(sys.modules, "sester", raising=False)
+        # ORTAM-OGRENDI: sys.modules[name]=None -> import ImportError verir
+        # (full-suitete baska testler x402_servis'i onceden import edebilir)
+        monkeypatch.setitem(sys.modules, "x402_servis", None)
         monkeypatch.setattr("sys.path", [p for p in sys.path if p != _SESTER])
         out = RS._fiyatlar()
     assert out == {}

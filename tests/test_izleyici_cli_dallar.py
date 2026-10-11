@@ -196,8 +196,10 @@ def test_remove_unicode(fs, capsys):
 
 # == _cmd_run =================================================================================
 
-def test_run_api_key_yok(fs, capsys, monkeypatch):
-    monkeypatch.setattr(sys, "modules", {**sys.modules})
+def test_run_api_key_yok(capsys, monkeypatch):
+    """ORTAM-OGRENDI: SERPER_API_KEY env'de YOKKEN -> rc=1.
+    Full-suitete fs/pyfakefs import mekanizmasini bozabilir; setitem yeterli."""
+    monkeypatch.delenv("SERPER_API_KEY", raising=False)
     import types as _t
     motor = _t.SimpleNamespace(env_oku=lambda: {},
                                ENV_DOSYASI=".env")
