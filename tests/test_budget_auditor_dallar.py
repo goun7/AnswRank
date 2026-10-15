@@ -127,14 +127,17 @@ def test_db_yok_float_int_tipleri(ws):
     assert isinstance(cagri, int)
 
 
-def test_tablo_yok_sifir_doner(ws):
-    """ORTAM: events tablosu yoksa ilk sorgu VE fallback de patlar
-    (cift-hata dali) -> (0.0, 0)."""
+def test_tablo_yok_alarm_verir_unpump_b1(ws, capsys):
+    """UNPUMP-B1 (DUZELTILDI): events-tablosu-yoksa-eski-kod-harcamayi-
+    gizliyordu-( 0.0, 0-fail-open). Artik-okunamayan-veri-alarm-vericidir
+    ( inf-asim-indirir-ve-stderr-uyarisi-yazar)."""
     yol = _db_yol(ws, "gamma")
     yol.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(yol)  # bos DB (hic tablo yok)
     c.close()
-    assert ba._servis_harcama(yol) == (0.0, 0)
+    sonuc = ba._servis_harcama(yol)
+    assert sonuc[0] == float("inf")
+    assert "okunamadi" in capsys.readouterr().err
 
 
 def test_bos_tablo_sifir_doner(ws):
@@ -242,16 +245,19 @@ def test_timestamp_yok_bos_sifir(ws):
 
 # == _servis_harcama: hata dallari (basarisizlik) ===================================================
 
-def test_db_dizin_connect_hatasi_sifir(ws):
-    """ORTAM: yol bir DIZIN ise exists() True ama mode=ro connect patlar
-    -> (0.0, 0)."""
+def test_db_dizin_connect_hatasi_alarm_verir_unpump_b1(ws, capsys):
+    """UNPUMP-B1 (DUZELTILDI): yol-DIZIN-ise-connect-patlar — eski-kod-
+    ( 0.0, 0)-fail-open; artik-inf-alarm ( gizli-harcama-yok)."""
     yol = _db_yol(ws, "dizinservis")
     yol.mkdir(parents=True, exist_ok=True)
-    assert ba._servis_harcama(yol) == (0.0, 0)
+    sonuc = ba._servis_harcama(yol)
+    assert sonuc[0] == float("inf")
+    assert "okunamadi" in capsys.readouterr().err
 
 
-def test_connect_istisna_sifir_doner(monkeypatch, ws):
-    """ORTAM: sqlite3.connect exception firlatirsa -> (0.0, 0)."""
+def test_connect_istisna_alarm_verir_unpump_b1(monkeypatch, ws, capsys):
+    """UNPUMP-B1 (DUZELTILDI): connect-istisnasinda-eski-kod-( 0.0, 0)-
+    donup-harcamayi-gizliyordu; artik-inf-alarm-ve-stderr-uyarisi."""
     yol = _db_yol(ws, "epsilon")
     yol.parent.mkdir(parents=True, exist_ok=True)
     yol.touch()
@@ -260,7 +266,9 @@ def test_connect_istisna_sifir_doner(monkeypatch, ws):
         raise sqlite3.OperationalError("db-down")
 
     monkeypatch.setattr(ba.sqlite3, "connect", _patla)
-    assert ba._servis_harcama(yol) == (0.0, 0)
+    sonuc = ba._servis_harcama(yol)
+    assert sonuc[0] == float("inf")
+    assert "okunamadi" in capsys.readouterr().err
 
 
 def test_ro_uri_yazmaya_izin_vermez(ws):
