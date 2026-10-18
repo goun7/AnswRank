@@ -11,11 +11,19 @@ Akış:
 Transfer eşleştirme: son N blokta PAY_TO'ya gelen USDC transferlerinden
 agent adresi + tutar + nonce ile eşleşeni arar. nonce, transferin
 takip edilebilirliğini sağlar (replay koruması ledger'da zaten var).
+
+DALGA-E3 ( K4=2/100 duzeltmesi): CLI giris-dogrulama katmani eklendi.
+Onceki: bilinmeyen-flag'ler ( --bogus) SESSIZCE rc=0 ile gecerdi
+( truthy-exit hatasi); --help 0-byte cikti veriyordu. Simdi: bilinmeyen
+flag / eksik arguman -> --help bas + rc=2 ( standart kullanma-hatasi).
+Modul-API'si ( find_transfer / verify_mainnet_payment) DEGISMEDI —
+mainnet_guard import'u aynen calisir.
 """
 from __future__ import annotations
 
 import json
 import logging
+import sys
 import urllib.request
 from dataclasses import dataclass
 
@@ -156,3 +164,82 @@ def verify_mainnet_payment(
     return find_transfer(
         from_addr=from_addr, to_addr=to_addr, amount_minor=amount_minor,
     )
+
+
+# ---------------------------------------------------------------------------
+# CLI giris-dogrulama katmani ( DALGA-E3) — GERCEK-CLI-cagrilari icin.
+# Bu modul bir kutuphane OLARAK da kullanilir ( mainnet_guard import eder);
+# alttaki dugme SADECE `python mainnet_verify.py` ile dogrudan calistirilinca
+# devreye girer — import-edildiginde calismaz ( mevcut cagri-yollari korundu).
+# ---------------------------------------------------------------------------
+_KULLANIM = """Kullanim: python mainnet_verify.py [SECENEK]
+
+Base mainnet'te gercek USDC transferini zincirden okur ( EIP-191 akisinin
+son adimi: imza "ben odedim" der, bu modul zincirde ODENMIS mi diye bakar).
+
+SECENEKLER:
+  --help, -h     bu yardimi goster ve cik ( rc=0)
+  --from ADDR    odeyen agent adresi ( 0x...)
+  --to ADDR      alici PAY_TO adresi ( 0x...)
+  --amount USD   dogrulanacak tutar ( USDC, 6 decimal)
+
+ORNEK:
+  python mainnet_verify.py --from 0x11.. --to 0xF3.. --amount 0.05
+
+NOT: programlik-API ( find_transfer / verify_mainnet_payment) mainnet_guard
+tarafindan IMPORT ile kullanilir — CLI-gate sadece dogrudan calistirmada
+devreye girer; argumansiz cagri onceki gibi rc=0 ile cikar.
+"""
+
+
+def cli_dogrula(argv: list[str] | None = None) -> int:
+    """CLI giris-katmani ( DALGA-E3, K4=2/100 duzeltmesi).
+
+    onceki: --bogus gibi bilinmeyen-flag'ler SESSIZCE rc=0 ile geciyordu
+    ( truthy-exit hatasi). Simdi: bilinmeyen flag / eksik arguman ->
+    --help bas + rc=2 ( standart kullanma-hatasi).
+
+    Returns: 0=devam-et, 2=kullanma-hatasi ( yardim basildi),
+             99=yardim-gosterildi ( cikti rc=0).
+    """
+    if argv is None:
+        argv = sys.argv[1:]
+    # --help oncelikli: herhangi bir konumda ise yardim bas + rc=0
+    for a in argv:
+        if a in ("-h", "--help"):
+            print(_KULLANIM)
+            return 99
+    bilinen_degerli = {"--from", "--to", "--amount"}
+    bilinir = bilinen_degerli | {"-h", "--help"}
+    bilinmeyen = {a for a in argv
+                  if a.startswith("-") and a not in bilinir}
+    if bilinmeyen:
+        print(f"[kullanma-hatasi] bilinmeyen secenek: "
+              f"{' '.join(sorted(bilinmeyen))}", file=sys.stderr)
+        print(_KULLANIM)
+        return 2
+    # deger-alan flag'lerden sonra arguman eksikse -> rc=2
+    for i, a in enumerate(argv):
+        if a in bilinen_degerli:
+            if i + 1 >= len(argv) or argv[i + 1].startswith("-"):
+                print(f"[kullanma-hatasi] {a} bir deger gerektirir.",
+                      file=sys.stderr)
+                print(_KULLANIM)
+                return 2
+    return 0
+
+
+def main() -> int:
+    """CLI giris-noktasi: once dogrula, sonra (gecerliyse) pas-gec."""
+    rc = cli_dogrula()
+    if rc == 99:
+        return 0
+    if rc != 0:
+        return 2
+    # argumansiz cagri: modulun kendisi bir kutuphanedir — onceki gibi
+    # sessizce rc=0 ile cik ( fonksiyonlar import-edilerek kullanilir).
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
