@@ -17,7 +17,9 @@ import sys
 
 import pytest
 
-_PROJE = "/home/gokun/projects/Yeni Fikirler/oncu_fikirler_havuzu_2026/23_Unpump_Cash_Otonom_Ajan_Borsasi_Ve_Nakit_Akisli_AMM"
+_PROJE = os.environ.get(
+    "MESH_UNPUMP_ROOT",
+    "/home/gokun/projects/00_TAMGA-MESH/unpump")  # G47
 if _PROJE not in sys.path:
     sys.path.insert(0, _PROJE)
 

@@ -12,12 +12,15 @@ DALLAR:
 from __future__ import annotations
 
 import sqlite3
+import os
 import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, "/home/gokun/projects/00_TAMGA-MESH/unpump")
+sys.path.insert(0, os.environ.get(
+    "MESH_UNPUMP_ROOT",
+    "/home/gokun/projects/00_TAMGA-MESH/unpump"))  # G47
 
 import tax_ledger as tl  # noqa: E402
 

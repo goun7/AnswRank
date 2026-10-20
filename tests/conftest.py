@@ -18,12 +18,34 @@ Isolation contract:
   later test.
 """
 
+import os
+import sys
 import tempfile
 
 import pytest
 
 from answrank.audit.cache import asset_cache
 from answrank.config import settings
+
+# ---------------------------------------------------------------------------
+# Mesh-kardes-repo kokleri ( G47, 2026-10-20)
+#
+# Bazi testler ( test_*_dallar.py, test_cli_giris_dogrulama_e3,
+# test_t9_payer_treasury_kalkan) AnswRank'in yandash-repolarinda-yasayan
+# modulleri import eder:
+#   unpump  -> agent_kanit_tablosu, tax_ledger, budget_auditor,
+#              net_kar_raporu, ajan_hazinesi, mainnet_guard
+#   sester  -> sester SDK ( PyPI'de sester==0.7.5, CI'de kuruluyor)
+#
+# Bu makinede repolar gercek-yollarinda-durur; GitHub-CI'inde YOKTUR.
+# Kokler MESH_UNPUMP_ROOT env'iyle-overridable; testler kendi iclerinde
+# ayni cozumu kullanir ( conftest-module-scope-degil, cunku pytest
+# rootdir-conftest'ini test-modullerinde-import-edemezsiniz).
+# ---------------------------------------------------------------------------
+_MESH_KOK = os.environ.get(
+    "MESH_UNPUMP_ROOT", "/home/gokun/projects/00_TAMGA-MESH/unpump")
+if os.path.isdir(_MESH_KOK) and _MESH_KOK not in sys.path:
+    sys.path.insert(0, _MESH_KOK)
 
 # Session-level redirect: anything constructed at import/collection time
 # (module singletons) lands in a temp file, never in the repo's answrank.db.

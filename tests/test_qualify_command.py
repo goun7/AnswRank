@@ -3,13 +3,17 @@
 Kural-1: mevcut dosyalara DOKUNULMADI, SADECE bu yeni dosya eklendi.
 Dış çağrı YOK: monkeypatch CandidateProfile/CandidateQualifier.
 """
+import os
 import sys
 from types import SimpleNamespace
 
 import pytest
 
 sys.path.insert(0, ".")
-sys.path.insert(0, "../../01_unicorn/63-Sester")
+# G47: sester SDK PyPI-de ( sester==0.7.5, CI-de-kurulu);
+# yalnizca-yerel-gelistirme-icin yedek-yol ( CI-de-YOK).
+sys.path.insert(0, os.environ.get(
+    "MESH_SESTER_ROOT", "../../01_unicorn/63-Sester"))
 
 import answrank.cli as cli  # noqa: E402
 import answrank.crm.qualifier as qual_mod  # noqa: E402

@@ -6,6 +6,7 @@ readme_stats._fiyatlar + _bot_sayilari + _charge_shield.
 """
 import io
 import json
+import os
 import sys
 from contextlib import contextmanager
 
@@ -21,7 +22,10 @@ def _readme_mod():
     yield RS
 
 
-_SESTER = "/home/gokun/projects/01_unicorn/63-Sester"
+# G47: sester SDK PyPI-de ( sester==0.7.5, CI-de-kurulu);
+# yalnizca-yerel-gelistirme-icin yedek-yol ( CI-de-YOK).
+_SESTER = os.environ.get(
+    "MESH_SESTER_ROOT", "/home/gokun/projects/01_unicorn/63-Sester")
 
 
 @contextmanager

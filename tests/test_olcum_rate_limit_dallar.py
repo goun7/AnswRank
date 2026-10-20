@@ -10,7 +10,10 @@ import time
 
 import pytest
 
-sys.path.insert(0, "/home/gokun/projects/01_unicorn/63-Sester")
+# G47: sester SDK PyPI-de ( sester==0.7.5, CI-de-kurulu);
+# yalnizca-yerel-gelistirme-icin yedek-yol ( CI-de-YOK).
+sys.path.insert(0, os.environ.get(
+    "MESH_SESTER_ROOT", "/home/gokun/projects/01_unicorn/63-Sester"))
 sys.path.insert(0, ".")
 os.environ.setdefault("UNPUMP_TREASURY_EOA", "0x" + "a" * 40)
 os.environ.setdefault("UNPUMP_SELLER_SECRET", "test-seller-secret")

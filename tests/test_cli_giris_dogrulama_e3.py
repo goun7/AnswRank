@@ -28,7 +28,9 @@ from pathlib import Path
 
 import pytest
 
-_KOK = Path("/home/gokun/projects/00_TAMGA-MESH/unpump")
+_KOK = Path(os.environ.get(
+    "MESH_UNPUMP_ROOT",
+    "/home/gokun/projects/00_TAMGA-MESH/unpump"))  # G47
 _MAINNET_VERIFY = _KOK / "mainnet_verify.py"
 _NET_KAR = _KOK / "net_kar_raporu.py"
 
