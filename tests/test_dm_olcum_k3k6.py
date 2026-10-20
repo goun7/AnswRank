@@ -89,8 +89,13 @@ def test_k3_olcum_kisisiz_aciklama_var():
 
 # --- K6: /olcum/rapor A/B karsilastirma ---
 
-def test_k6_rapor_sifir_veri_dürüst_cikti():
+def test_k6_rapor_sifir_veri_dürüst_cikti(monkeypatch):
     """K6 ZORUNLU: 0 veri olduğunda dürüst çıktı ( DM HOLD aktif)."""
+    # G47: dm_hold GERÇEK outbox'tan türetilir — outbox/ yerel-isletim
+    # ciktisidir ( gitignore, CI-de-YOK). Bu-test raporun HONEST-ciktilarini
+    # sinar, hold-durumunu DEGIL — bu-yuzden hold deterministik-olarak
+    # True'ya-sabitlenir ( kritik2'deki-maymun-yama-deseni-aynisi).
+    monkeypatch.setattr(xs, "_dm_hold_durumu", lambda: True)
     r = _client.get("/olcum/rapor")
     assert r.status_code == 200
     v = r.json()

@@ -28,6 +28,11 @@ jobs:
           # matrisinde-kurulamaz-oralarda testler importorskip-ile-acik
           # gerekceyle-atlanir ( sessiz-pas-DEGIL).
           pip install "sester==0.7.5" || echo "sester kurulamadi ( py3.10?)"
+          # sester.schemes.PaymentError calisma-aninda eth-account-ister
+          # ( receipt-imzalama); KURULU-DEGILSE-odeme-kapisi-acik-caresiz
+          # hata-verir. sester'in-kendi-bagimliliginda-yer-alir-AMA-RUNTIME
+          # import-gerceklesinceye-kadar-belli-olmaz —bu-yuzden-acikca-kur.
+          pip install "eth-account" || echo "eth-account kurulamadi ( py3.10?)"
       # The audit engine is fully offline: conftest points the DB at a tmp
       # path, and live-LLM citation tests fall back to a clearly-labelled
       # simulation when no API keys are present.

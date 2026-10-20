@@ -59,7 +59,15 @@ def gecici_outbox(tmp_path, monkeypatch):
 # --- _dm_hold_durumu: GERÇEK outbox ---
 
 def test_dm_hold_gercek_outboxtan_true():
-    """GERÇEK outbox: 15 DRAFT + sent=0 → dm_hold TRUE."""
+    """GERÇEK outbox: 15 DRAFT + sent=0 -> dm_hold TRUE.
+
+    G47: outbox/ yerel-isletim-ciktisi-oldugu-icin-gitignore-da ( CI-de
+    YOK). Bu-durumda-test-duzenli-olarak-skip-lensin ( makine-ozel-veriye
+    bagli-bir-iddia-uretemez).
+    """
+    if not Path(str(_GERCEK_OUTBOX)).is_dir() or \
+            not list(Path(str(_GERCEK_OUTBOX)).glob("*.eml")):
+        pytest.skip("outbox/ yerel-cikti — CI-de-YOK ( G47)")
     # gercek outbox'u sına ( degisiklik YAPMADAN — sadece okuma)
     xs._OUTBOX_DIZIN = _GERCEK_OUTBOX
     assert xs._dm_hold_durumu() is True
@@ -118,7 +126,10 @@ def test_olcum_dm_hold_alani_var():
 
 
 def test_olcum_dm_hold_true_gercek_outbox():
-    """GERÇEK outbox ile /olcum → dm_hold: true ( hardcoded DEGIL)."""
+    """GERÇEK outbox ile /olcum -> dm_hold: true ( hardcoded DEGIL)."""
+    _OUTBOX = Path(str(_GERCEK_OUTBOX))
+    if not _OUTBOX.is_dir() or not list(_OUTBOX.glob("*.eml")):
+        pytest.skip("outbox/ yerel-cikti — CI-de-YOK ( G47)")
     xs._OUTBOX_DIZIN = _GERCEK_OUTBOX
     r = _client.get("/olcum")
     assert r.json()["dm_hold"] is True
@@ -127,7 +138,10 @@ def test_olcum_dm_hold_true_gercek_outbox():
 # --- /olcum/rapor: 0-veri + dm_hold=true ---
 
 def test_rapor_sifir_veri_dm_hold_true():
-    """0 veri + GERÇEK outbox → 'Henuz gonderim yok' + HOLD aktif."""
+    """0 veri + GERÇEK outbox -> 'Henuz gonderim yok' + HOLD aktif."""
+    _OUTBOX = Path(str(_GERCEK_OUTBOX))
+    if not _OUTBOX.is_dir() or not list(_OUTBOX.glob("*.eml")):
+        pytest.skip("outbox/ yerel-cikti — CI-de-YOK ( G47)")
     xs._REF_SAYACLAR.clear()
     xs._OUTBOX_DIZIN = _GERCEK_OUTBOX
     r = _client.get("/olcum/rapor")
