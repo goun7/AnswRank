@@ -17,7 +17,14 @@ sys.path.insert(0, ".")
 os.environ.setdefault("UNPUMP_TREASURY_EOA", "0x" + "a" * 40)
 os.environ.setdefault("UNPUMP_SELLER_SECRET", "test-seller-secret")
 os.environ.setdefault("ANSWRANK_SELLER_SECRET", "test-answrank-secret")
-import x402_servis as xs  # noqa: E402
+try:  # G47: kardes-repo-CI-de-YOKSA-acik-gerekceyle-atla
+    import x402_servis as xs  # noqa: E402
+except ImportError as _g47_hatasi:
+    pytest.importorskip(
+        "x402_servis",
+        reason=("kardes-repo-unpump bu-checkout-ta-YOK; "
+                "MESH_UNPUMP_ROOT-ile-kok-verilir ( %s)"
+                % _g47_hatasi))
 
 
 class FakeLedger:

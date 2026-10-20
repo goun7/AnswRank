@@ -21,7 +21,15 @@ sys.path.insert(0, os.environ.get(
     "MESH_UNPUMP_ROOT",
     "/home/gokun/projects/00_TAMGA-MESH/unpump"))  # G47
 
-import net_kar_raporu as nkr  # noqa: E402
+try:
+    import net_kar_raporu as nkr  # noqa: E402
+except ImportError as _g47_hatasi:  # G47: kardes-repo-CI'de-YOK
+    pytest.importorskip(
+        "net_kar_raporu",
+        reason=(
+            "kardes-repo-unpump bu-checkout'ta-YOK; "
+            "MESH_UNPUMP_ROOT-ile-kok-verebilirsiniz "
+            "( yerel: %s)" % _g47_hatasi))
 
 
 class TestSandboxAdresleriTamamla:

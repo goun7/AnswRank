@@ -29,7 +29,15 @@ sys.path.insert(0, os.environ.get(
     "MESH_UNPUMP_ROOT",
     "/home/gokun/projects/00_TAMGA-MESH/unpump"))  # G47
 
-import agent_kanit_tablosu as akt  # noqa: E402
+try:
+    import agent_kanit_tablosu as akt  # noqa: E402
+except ImportError as _g47_hatasi:  # G47: kardes-repo-CI'de-YOK
+    pytest.importorskip(
+        "agent_kanit_tablosu",
+        reason=(
+            "kardes-repo-unpump bu-checkout'ta-YOK; "
+            "MESH_UNPUMP_ROOT-ile-kok-verebilirsiniz "
+            "( yerel: %s)" % _g47_hatasi))
 
 BOS_IST = {"toplam": 0, "sandbox_disi": 0, "gercek": 0,
            "gercek_gelir": 0.0, "gercek_musteri": False}

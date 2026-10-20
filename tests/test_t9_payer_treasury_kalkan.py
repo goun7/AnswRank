@@ -23,12 +23,19 @@ _PROJE = os.environ.get(
 if _PROJE not in sys.path:
     sys.path.insert(0, _PROJE)
 
-mainnet_guard = importlib.import_module("mainnet_guard")
+try:  # G47: kardes-repo-CI-de-YOKSA-acik-gerekceyle-atla
+    mainnet_guard = importlib.import_module("mainnet_guard")
+    ajan_hazinesi = importlib.import_module("ajan_hazinesi")
+except ImportError as _g47_hatasi:
+    pytest.importorskip(
+        "mainnet_guard",
+        reason=("kardes-repo-unpump bu-checkout-ta-YOK; "
+                "MESH_UNPUMP_ROOT-ile-kok-verilir ( %s)"
+                % _g47_hatasi))
 resolve_treasury = mainnet_guard.resolve_treasury
 _valid_eoa = mainnet_guard._valid_eoa
 
 # ajan_hazinesi ( bu repoda, G-001/G-002 ile ayni yerde)
-ajan_hazinesi = importlib.import_module("ajan_hazinesi")
 bolusum_hesapla = ajan_hazinesi.bolusum_hesapla
 GelirKaydi = ajan_hazinesi.GelirKaydi
 

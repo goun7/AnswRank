@@ -22,7 +22,15 @@ sys.path.insert(0, os.environ.get(
     "MESH_UNPUMP_ROOT",
     "/home/gokun/projects/00_TAMGA-MESH/unpump"))  # G47
 
-import tax_ledger as tl  # noqa: E402
+try:
+    import tax_ledger as tl  # noqa: E402
+except ImportError as _g47_hatasi:  # G47: kardes-repo-CI'de-YOK
+    pytest.importorskip(
+        "tax_ledger",
+        reason=(
+            "kardes-repo-unpump bu-checkout'ta-YOK; "
+            "MESH_UNPUMP_ROOT-ile-kok-verebilirsiniz "
+            "( yerel: %s)" % _g47_hatasi))
 
 
 @pytest.fixture

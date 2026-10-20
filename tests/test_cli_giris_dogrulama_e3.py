@@ -53,9 +53,15 @@ def _calistir(script: Path, *args: str, timeout: float = 120.0
 
 @pytest.fixture(autouse=True)
 def _kok_hazir():
-    """Script'lerin gercekten var oldugundan emin ol ( symlink-repo)."""
-    assert _MAINNET_VERIFY.is_file(), "mainnet_verify.py bulunamadi"
-    assert _NET_KAR.is_file(), "net_kar_raporu.py bulunamadi"
+    """Script'lerin gercekten var oldugundan emin ol ( symlink-repo).
+
+    G47: kardes-repo bu-checkout-ta-YOKSA ( GitHub-CI) modul-satisfy
+    edilemez — acik-gerekceyle-skip ( sessiz-toplama-hatasi-DEGIL).
+    """
+    if not (_MAINNET_VERIFY.is_file() and _NET_KAR.is_file()):
+        pytest.skip(
+            "unpump-kardes-repo bu-checkout-ta-YOK; "
+            "MESH_UNPUMP_ROOT-ile-kok-verilir")
     yield
 
 

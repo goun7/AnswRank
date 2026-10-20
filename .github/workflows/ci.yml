@@ -24,9 +24,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
           # mesh-bag testleri ( x402_servis) sester SDK'sini import eder;
-          # SDK PyPI'de ( sester==0.7.5). Yerel-makine yoluna baimli
-          # degil, reproducible-CI icin paket-olarak kurulur.
-          pip install "sester==0.7.5"
+          # SDK PyPI'de ( sester>=0.7.5, Requires-Python>=3.11). 3.10-
+          # matrisinde-kurulamaz-oralarda testler importorskip-ile-acik
+          # gerekceyle-atlanir ( sessiz-pas-DEGIL).
+          pip install "sester==0.7.5" || echo "sester kurulamadi ( py3.10?)"
       # The audit engine is fully offline: conftest points the DB at a tmp
       # path, and live-LLM citation tests fall back to a clearly-labelled
       # simulation when no API keys are present.
