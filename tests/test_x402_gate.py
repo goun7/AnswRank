@@ -46,6 +46,10 @@ def _make_receipt(db_path: str, secret: str, *, tool: str = "answrank_audit",
     istemciye doner; istemci bunu `payment_receipt` olarak tool cagrisinda
     sunar. Burada satici ledger'i test temp'inde acilir.
     """
+    pytest.importorskip(
+        "sester",
+        reason="sester SDK PyPI-de-Requires-Python>=3.11; "
+               "py3.10-matrisinde-kurulamaz ( G47)")
     from sester.ledger import Ledger
     from sester.receipt import issue_receipt
 
@@ -137,6 +141,11 @@ def test_paid_test_mode_anchors_delivery_to_ledger(tmp_path):
 def mainnet_gate(tmp_path):
     """Mainnet modu (test DEGIL) -- zincirde transfer ZORUNLU; dogrulayici
     taklit edilir, boylece test ana aga DOKUNMAZ."""
+    # G47: sester-YOKSA-gate-zaten-kurulamaz ( dogrulayici-importu-ic).
+    pytest.importorskip(
+        "sester",
+        reason="sester SDK PyPI-de-Requires-Python>=3.11; "
+               "py3.10-matrisinde-kurulamaz")
     return SesterPaymentGate(
         db_path=str(tmp_path / "mn.sqlite"),
         secret=_SECRET,

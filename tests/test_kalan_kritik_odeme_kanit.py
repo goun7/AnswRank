@@ -155,6 +155,10 @@ def test_receipt_hash_delegates_and_fails_closed(tmp_path, monkeypatch):
     """Honest arm: gecerli makbuz -> hex hash (HMAC zinciri uzerinde).
     Fault arm: sester hesaplayamazsa "" doner -- makbuz hash'i
     uydurulmaz, kapı 'odeme dogrulanmadi'ya fail-closed gider."""
+    pytest.importorskip(
+        "sester",
+        reason="sester SDK PyPI-de-Requires-Python>=3.11; "
+               "py3.10-matrisinde-kurulamaz ( G47)")
     from sester.ledger import Ledger
     from sester.receipt import issue_receipt
 
@@ -177,6 +181,10 @@ def test_get_ledger_reuses_injected_and_lazily_opens_sester(tmp_path, monkeypatc
     """Honest arm: enjekte edilen ledger aynen doner (tekrar acilmaz);
     yoksa sester ledger'i db_path'de lazily acilir ve '_ledger_opened'
     flip eder. Fault arm: ledger acilamazsa hata gizlice yutulMAZ."""
+    pytest.importorskip(
+        "sester",
+        reason="sester SDK PyPI-de-Requires-Python>=3.11; "
+               "py3.10-matrisinde-kurulamaz ( G47)")
     class _Ledger:
         def __init__(self, path, secret):
             self.path, self.secret = path, secret

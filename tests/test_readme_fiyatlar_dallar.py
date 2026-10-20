@@ -33,9 +33,16 @@ def _sester_yuklu():
     """ORTAM-OGRENDI: x402_servis importu icin Sester dizini sys.path'te
     OLMALIDIR + 3 env setdefault (UNPUMP_TREASURY_EOA / ANSWRANK_MAINNET_PAY_TO
     / ANSWRANK_SELLER_SECRET) — _fiyatlar kendi setdefault'unu yapar ama
-    sys.path'yi disaridan hazirlamak gerekir."""
+    sys.path'yi disaridan hazirlamak gerekir.
+
+    G47: sester+unpump-CI-de-YOKSA-tum-fiyat-testleri-skip'lenir
+    ( kod-sabitleri kardes-repodan-geliyor, ornatilmadan-test-edilemez).
+    """
+    if not os.path.isdir(_SESTER):
+        pytest.skip(
+            "sester-kardes-repo bu-checkout-ta-YOK; MESH_SESTER_ROOT-ile-"
+            "kok-verilir ( G47)")
     sys.path.insert(0, _SESTER)
-    import os
     for k, v in [("UNPUMP_TREASURY_EOA",
                   "0xF3F0cC9DE0Df5A17a09bfcc62d21BFC9Ba4f82c5"),
                  ("ANSWRANK_MAINNET_PAY_TO",

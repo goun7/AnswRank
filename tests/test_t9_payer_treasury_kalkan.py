@@ -27,11 +27,10 @@ try:  # G47: kardes-repo-CI-de-YOKSA-acik-gerekceyle-atla
     mainnet_guard = importlib.import_module("mainnet_guard")
     ajan_hazinesi = importlib.import_module("ajan_hazinesi")
 except ImportError as _g47_hatasi:
-    pytest.importorskip(
-        "mainnet_guard",
-        reason=("kardes-repo-unpump bu-checkout-ta-YOK; "
-                "MESH_UNPUMP_ROOT-ile-kok-verilir ( %s)"
-                % _g47_hatasi))
+    pytest.skip(
+        "kardes-repo-unpump bu-checkout-ta-YOK; "
+        "MESH_UNPUMP_ROOT-ile-kok-verilir ( %s)" % _g47_hatasi,
+        allow_module_level=True)
 resolve_treasury = mainnet_guard.resolve_treasury
 _valid_eoa = mainnet_guard._valid_eoa
 
