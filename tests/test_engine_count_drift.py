@@ -128,7 +128,14 @@ def test_proprietary_license_sealed():
     bu ürünün kendisi satılır, kodu değil. Ekip 8 Apache'ye çevirmişti,
     kullanıcı kararıyla geri alındı.
     """
-    import tomllib, pathlib
+    import pathlib
+    # G47-f: tomllib-stdlib-yalnizca-3.11+-de-var; 3.10-matrisinde-tomli
+    # ( pip-tarafindan-zaten-kurulu) ile-yedeklenir — importorskip-ile-acik
+    # gerekce-degil, uyumlu-fallback ( config-parser-ayni-sonucu-verir).
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # py3.10
+        import tomli as tomllib
     lic = pathlib.Path("LICENSE").read_text(encoding="utf-8")
     assert "T\u00fcm haklar\u0131 sakl\u0131d\u0131r" in lic and "LicenseRef-AnswRank-Proprietary" in lic
     meta = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
