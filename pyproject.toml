@@ -16,7 +16,6 @@ keywords = ["aeo", "geo", "seo", "answer-engine-optimization", "ai-search", "llm
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
